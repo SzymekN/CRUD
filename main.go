@@ -15,6 +15,7 @@ type User struct {
 	Age        int    `json:"age" query:"age" form:"age" param:"age"`
 }
 
+//e.PUT("/api/v1/users/:id", updateUser)
 func updateUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 	_, ok := users[id]
@@ -27,6 +28,20 @@ func updateUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, users[id])
 }
 
+//e.DELETE("/api/v1/users/:id", deleteUser)
+func deleteUser(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+	_, ok := users[id]
+
+	if !ok {
+		return c.String(http.StatusNotFound, "User with given id doesn't exist")
+	}
+
+	delete(users, id)
+	return c.JSON(http.StatusOK, users[id])
+}
+
+//	e.POST("/api/v1/users/save", saveUser)
 func saveUser(c echo.Context) error {
 	var u User
 	if err := c.Bind(u); err != nil {
@@ -71,8 +86,7 @@ func main() {
 	e.GET("/api/v1/users", getUsers)
 	e.POST("/api/v1/users/save", saveUser)
 	e.PUT("/api/v1/users/:id", updateUser)
-
-	// e.DELETE("/api/v1/users/:id", deleteUser)
+	e.DELETE("/api/v1/users/:id", deleteUser)
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
