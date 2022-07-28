@@ -3,7 +3,11 @@ module crud
 go 1.18
 
 require (
-	github.com/labstack/echo/v4 v4.7.2 // indirect
+	github.com/labstack/echo v3.3.10+incompatible
+	github.com/labstack/echo/v4 v4.7.2
+)
+
+require (
 	github.com/labstack/gommon v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
