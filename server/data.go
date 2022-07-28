@@ -1,4 +1,4 @@
-package handlers
+package server
 
 type User struct {
 	Id         int    `json:"id" query:"id" form:"id" param:"id"`

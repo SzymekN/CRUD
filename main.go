@@ -1,11 +1,11 @@
 package main
 
 import (
-	handler "crud/handlers"
+	server "crud/server"
 )
 
 func main() {
 
-	e := handler.SetupRouter()
+	e := server.SetupRouter()
 	e.Logger.Fatal(e.Start(":1323"))
 }

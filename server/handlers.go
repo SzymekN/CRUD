@@ -1,4 +1,4 @@
-package handlers
+package server
 
 import (
 	"net/http"
@@ -32,6 +32,7 @@ func UpdateUser(c echo.Context) error {
 		return err
 	}
 
+	// users[i].Id = id
 	return c.JSON(http.StatusOK, users[i])
 }
 
