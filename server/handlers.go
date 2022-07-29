@@ -25,7 +25,7 @@ func UpdateUser(c echo.Context) error {
 	i, ok := findUser(id)
 
 	if !ok {
-		return c.JSON(http.StatusBadRequest, `"error":"User with given id doesn't exist"`)
+		return c.String(http.StatusBadRequest, `"error":"User with given id doesn't exist"`)
 	}
 
 	if err := c.Bind(users[i]); err != nil {
@@ -42,7 +42,7 @@ func DeleteUser(c echo.Context) error {
 	i, ok := findUser(id)
 
 	if !ok {
-		return c.JSON(http.StatusBadRequest, `"error":"User with given id doesn't exist"`)
+		return c.String(http.StatusBadRequest, `"error":"User with given id doesn't exist"`)
 	}
 
 	users = removeUser(users, id)
@@ -55,7 +55,7 @@ func GetUserById(c echo.Context) error {
 	i, ok := findUser(id)
 
 	if !ok {
-		return c.JSON(http.StatusBadRequest, `"error":"User with given id doesn't exist"`)
+		return c.String(http.StatusBadRequest, `"error":"User with given id doesn't exist"`)
 	}
 
 	return c.JSON(http.StatusOK, users[i])

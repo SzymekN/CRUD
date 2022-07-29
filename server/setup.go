@@ -9,7 +9,7 @@ import (
 func SetupRouter() *echo.Echo {
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, `{"message":"Hello World!"}`)
+		return c.String(http.StatusOK, `{"message":"Hello World!"}`)
 	})
 	e.GET("/api/v1/users/:id", GetUserById)
 	e.GET("/api/v1/users", GetUsers)
