@@ -1,10 +1,10 @@
 package server
 
 type User struct {
-	Id         int    `json:"id" query:"id" form:"id" param:"id"`
-	First_name string `json:"firstname" query:"firstname" form:"firstname" param:"firstname"`
-	Last_name  string `json:"lastname" query:"lastname" form:"lastname" param:"lastname"`
-	Age        int    `json:"age" query:"age" form:"age" param:"age"`
+	Id         int    `json:"id" form:"id"`
+	First_name string `json:"firstname" form:"firstname"`
+	Last_name  string `json:"lastname" form:"lastname"`
+	Age        int    `json:"age" form:"age"`
 }
 
 var (

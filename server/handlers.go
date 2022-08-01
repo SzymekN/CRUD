@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	storage "crud/database"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,7 +21,7 @@ func SaveUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, users[maxID-1])
 }
 
-//e.PUT("/api/v1/users/:id", updateUser)
+//	e.PUT("/api/v1/users/:id", updateUser)
 func UpdateUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 	i, ok := findUser(id)
@@ -36,7 +38,7 @@ func UpdateUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, users[i])
 }
 
-//e.DELETE("/api/v1/users/:id", deleteUser)
+//	e.DELETE("/api/v1/users/:id", deleteUser)
 func DeleteUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
 	i, ok := findUser(id)
@@ -63,5 +65,12 @@ func GetUserById(c echo.Context) error {
 
 // e.GET("/api/v1/users", getUsers)
 func GetUsers(c echo.Context) error {
-	return c.JSON(http.StatusOK, users)
+	db := storage.GetDBInstance()
+	usrs := []User{}
+
+	if err := db.Find(&usrs).Error; err != nil {
+		return nil
+	}
+
+	return c.JSON(http.StatusOK, usrs)
 }

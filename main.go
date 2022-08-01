@@ -1,11 +1,13 @@
 package main
 
 import (
+	storage "crud/database"
 	server "crud/server"
 )
 
 func main() {
 
 	e := server.SetupRouter()
-	e.Logger.Fatal(e.Start(":8200"))
+	storage.NewDB()
+	e.Logger.Fatal(e.Start(":8200")) // port as env variable
 }
