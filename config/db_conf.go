@@ -3,11 +3,11 @@ package config
 import "fmt"
 
 const (
-	DBUser     = "postgres"
-	DBPassword = "admin"
+	DBUser     = "userapi"
+	DBPassword = "userapi"
 	DBName     = "userapi"
-	DBHost     = "127.0.0.1"
-	DBPort     = "8220"
+	DBHost     = "192.168.33.30"
+	DBPort     = "5432"
 	DBType     = "postgres"
 )
 

@@ -1,14 +1,16 @@
-CREATE USER userapi WITH PASSWORD 'userapi' CREATEDB;
+-- CREATE USER userapi WITH PASSWORD 'userapi' CREATEDB LOGIN;
 
-CREATE DATABASE userapi
-    WITH 
-    OWNER = userapi
-    ENCODING = 'UTF8'
-    LC_COLLATE = 'en_US.utf8'
-    LC_CTYPE = 'en_US.utf8'
-    TABLESPACE = pg_default
-    CONNECTION LIMIT = -1;
+-- CREATE DATABASE userapi
+--     WITH 
+--     OWNER = userapi
+--     ENCODING = 'UTF8'
+--     LC_COLLATE = 'en_US.UTF-8'
+--     LC_CTYPE = 'en_US.UTF-8'
+--     TABLESPACE = pg_default
+--     CONNECTION LIMIT = -1;
 
+\c userapi;
+GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA public TO userapi;
 create table users(
     id int not null,
     firstname text,
