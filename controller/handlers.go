@@ -16,9 +16,6 @@ func SaveUser(c echo.Context) error {
 	if err := c.Bind(&u); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
-	model.MaxID++
-	u.Id = model.MaxID
-
 	db := storage.GetDBInstance()
 	db.Create(&u)
 	return c.JSON(http.StatusOK, u)

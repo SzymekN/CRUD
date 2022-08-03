@@ -13,8 +13,8 @@
 GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA public TO userapi;
 create table users(
     id int not null,
-    firstname text,
-    lastname text,
+    firstname varchar(50),
+    lastname varchar(50),
     age int,
     PRIMARY KEY(id)
 );
