@@ -19,7 +19,7 @@ create table users(
     PRIMARY KEY(id)
 );
 
-insert into users(id,firstname,lastname, age) values(1, 'Szymon', 'Nowak', 22);
-insert into users(id,firstname,lastname, age) values(2, 'Jan', 'Kowalski', 31);
-insert into users(id,firstname,lastname, age) values(3, 'Chuck', 'Norris', 18);
-insert into users(id,firstname,lastname, age) values(4, 'Andrzej', 'Duda', 41);
+insert into users(firstname,lastname, age) values('Szymon', 'Nowak', 22);
+insert into users(firstname,lastname, age) values('Jan', 'Kowalski', 31);
+insert into users(firstname,lastname, age) values('Chuck', 'Norris', 18);
+insert into users(firstname,lastname, age) values('Andrzej', 'Duda', 41);

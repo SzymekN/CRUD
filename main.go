@@ -15,7 +15,9 @@ func main() {
 	if len(os.Args) > 1 {
 		port = os.Args[1]
 	} else {
-		port = os.Getenv("ECHO_PORT")
+		if temp := os.Getenv("ECHO_PORT"); temp != "" {
+			port = temp
+		}
 	}
 
 	seeder.CreateAndSeed(storage.GetDBInstance())
