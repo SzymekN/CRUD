@@ -78,16 +78,21 @@ Vagrant.configure("2") do |config|
 
     echo "<------ CREATING USERAPI DATABASE AND USER ------>"
     
-    sudo -u postgres psql -c "CREATE USER userapi WITH PASSWORD 'userapi' SUPERUSER CREATEDB LOGIN;"
+    sudo -u postgres psql -c "CREATE USER userapi WITH PASSWORD 'userapi' CREATEDB LOGIN;"
     sudo -u postgres psql -c "CREATE database userapi WITH OWNER = userapi;"
     sudo -u postgres psql < /vagrant_data/create_db_userapi.sql
+    # export PGDATABASE=postgres
+    # sudo service postgresql restart
     sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE userapi TO userapi;"
-    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA public TO userapi"
+    sudo -u postgres psql -d userapi -c "GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA public TO userapi" 
+    sudo -u postgres psql -d userapi  -c "GRANT ALL PRIVILEGES ON ALL sequences IN SCHEMA public TO userapi" 
     
     echo "<------ POSTGRES CONFIGURATION ------>"
 
     sudo sed -i "s/#listen_address.*/listen_addresses '*'/" /etc/postgresql/9.3/main/postgresql.conf
     sudo cp /vagrant_data/pg_hba.conf /etc/postgresql/9.3/main/ 
+
+    sudo service postgresql restart
 
   SHELL
 end

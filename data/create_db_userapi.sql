@@ -9,10 +9,9 @@
 --     TABLESPACE = pg_default
 --     CONNECTION LIMIT = -1;
 
-\c userapi;
 GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA public TO userapi;
 create table users(
-    id int not null,
+    id serial,
     firstname varchar(50),
     lastname varchar(50),
     age int,
