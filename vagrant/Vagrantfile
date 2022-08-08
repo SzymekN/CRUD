@@ -19,80 +19,128 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "ubuntu/trusty64"
-  config.vm.hostname = "dbmachine"
 
-  # Disable automatic box update checking. If you disable this, then
-  # boxes will only be checked for updates when the user runs
-  # `vagrant box outdated`. This is not recommended.
-  # config.vm.box_check_update = false
+  config.vm.box = "ubuntu/focal64"
+  config.vm.synced_folder "../shared", "/vagrant_data"
+  
+  config.vm.define "psqlVM" do |psqlVM|
+    psqlVM.vm.hostname = "psqlVM"
 
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  # NOTE: This will enable public access to the opened port
-  config.vm.network "forwarded_port", guest: 5432, host: 8221
+    # Disable automatic box update checking. If you disable this, then
+    # boxes will only be checked for updates when the user runs
+    # `vagrant box outdated`. This is not recommended.
+    # config.vm.box_check_update = false
 
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine and only allow access
-  # via 127.0.0.1 to disable public access
-  # config.vm.network "forwarded_port", guest: 5432, host: 8221, host_ip: "127.0.0.1"
+    # Create a forwarded port mapping which allows access to a specific port
+    # within the machine from a port on the host machine. In the example below,
+    # accessing "localhost:8080" will access port 80 on the guest machine.
+    # NOTE: This will enable public access to the opened port
+    # config.vm.network "forwarded_port", guest: 5432, host: 8221
 
-  # Create a private network, which allows host-only access to the machine
-  # using a specific IP.
-  config.vm.network "private_network", ip: "192.168.33.30"
+    # Create a forwarded port mapping which allows access to a specific port
+    # within the machine from a port on the host machine and only allow access
+    # via 127.0.0.1 to disable public access
+    # config.vm.network "forwarded_port", guest: 5432, host: 8221, host_ip: "127.0.0.1"
 
-  # Create a public network, which generally matched to bridged network.
-  # Bridged networks make the machine appear as another physical device on
-  # your network.
-  # config.vm.network "public_network"
+    # Create a private network, which allows host-only access to the machine
+    # using a specific IP.
+    psqlVM.vm.network "private_network", ip: "192.168.33.30"
 
-  # Share an additional folder to the guest VM. The first argument is
-  # the path on the host to the actual folder. The second argument is
-  # the path on the guest to mount the folder. And the optional third
-  # argument is a set of non-required options.
-  config.vm.synced_folder "../data", "/vagrant_data"
+    # Create a public network, which generally matched to bridged network.
+    # Bridged networks make the machine appear as another physical device on
+    # your network.
+    # config.vm.network "public_network"
 
-  # Provider-specific configuration so you can fine-tune various
-  # backing providers for Vagrant. These expose provider-specific options.
-  # Example for VirtualBox:
-  #
-  # config.vm.provider "virtualbox" do |vb|
-  #   # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
-  #
-  #   # Customize the amount of memory on the VM:
-  #   vb.memory = "1024"
-  # end
-  #
-  # View the documentation for the provider you are using for more
-  # information on available options.
+    # Share an additional folder to the guest VM. The first argument is
+    # the path on the host to the actual folder. The second argument is
+    # the path on the guest to mount the folder. And the optional third
+    # argument is a set of non-required options.
+    # config.vm.synced_folder "../shared", "/vagrant_data"
 
-  # Enable provisioning with a shell script. Additional provisioners such as
-  # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
-  # documentation for more information about their specific syntax and use.
-  config.vm.provision "shell", inline: <<-SHELL
-    apt-get update
-    # apt-get install -y apache2
-    sudo apt-get install postgresql postgresql-contrib -y
+    # Provider-specific configuration so you can fine-tune various
+    # backing providers for Vagrant. These expose provider-specific options.
+    # Example for VirtualBox:
+    #
+    # config.vm.provider "virtualbox" do |vb|
+    #   # Display the VirtualBox GUI when booting the machine
+    #   vb.gui = true
+    #
+    #   # Customize the amount of memory on the VM:
+    #   vb.memory = "1024"
+    # end
+    #
+    # View the documentation for the provider you are using for more
+    # information on available options.
 
-    echo "<------ CREATING USERAPI DATABASE AND USER ------>"
+    # Enable provisioning with a shell script. Additional provisioners such as
+    # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
+    # documentation for more information about their specific syntax and use.
+    psqlVM.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      # apt-get install -y apache2
+      sudo apt-get install postgresql postgresql-contrib -y
+
+      echo "<------ CREATING USERAPI DATABASE AND USER ------>"
+      
+      sudo -u postgres psql -c "CREATE USER userapi WITH PASSWORD 'userapi' CREATEDB LOGIN;"
+      sudo -u postgres psql -c "CREATE database userapi WITH OWNER = userapi;"
+      sudo -u postgres psql < /vagrant_data/create_db_userapi.sql
+      # export PGDATABASE=postgres
+      # sudo service postgresql restart
+      sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE userapi TO userapi;"
+      sudo -u postgres psql -d userapi -c "GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA public TO userapi" 
+      sudo -u postgres psql -d userapi  -c "GRANT ALL PRIVILEGES ON ALL sequences IN SCHEMA public TO userapi" 
+      
+      echo "<------ POSTGRES CONFIGURATION ------>"
+
+      sudo sed -i "s/#listen_address.*/listen_addresses '*'/" /etc/postgresql/9.3/main/postgresql.conf
+      sudo cp /vagrant_data/pg_hba.conf /etc/postgresql/9.3/main/ 
+
+      sudo service postgresql restart
+
+    SHELL
+
+  end
+
+  config.vm.define "cassandraVM" do |cassandraVM|
+
+
+    cassandraVM.vm.provider "virtualbox" do |vb|
+      # Display the VirtualBox GUI when booting the machine
+      # vb.gui = true
     
-    sudo -u postgres psql -c "CREATE USER userapi WITH PASSWORD 'userapi' CREATEDB LOGIN;"
-    sudo -u postgres psql -c "CREATE database userapi WITH OWNER = userapi;"
-    sudo -u postgres psql < /vagrant_data/create_db_userapi.sql
-    # export PGDATABASE=postgres
-    # sudo service postgresql restart
-    sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE userapi TO userapi;"
-    sudo -u postgres psql -d userapi -c "GRANT ALL PRIVILEGES ON ALL tables IN SCHEMA public TO userapi" 
-    sudo -u postgres psql -d userapi  -c "GRANT ALL PRIVILEGES ON ALL sequences IN SCHEMA public TO userapi" 
+      # Customize the amount of memory on the VM:
+      vb.memory = "2048"
+    end
+
+    cassandraVM.vm.hostname = "cassandraVM"
+
+    cassandraVM.vm.network "private_network", ip: "192.168.33.40"
+    # cassandraVM.vm.network "public_network"
+
+    cassandraVM.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      # apt-get install -y apache2
+      # sudo apt-get install ca-certificates curl gnupg lsb-release
+      # sudo mkdir -p /etc/apt/keyrings
+      # echo "nameserver 8.8.8.8" | sudo tee -a /etc/resolv.conf
+      # curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+      # echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      # $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      # sudo apt-get update
+      # sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+      curl -fsSL https://get.docker.com -o get-docker.sh
+      DRY_RUN=1 sudo sh ./get-docker.sh
+      sudo docker pull cassandra
+      sudo docker network create cassandra
+      sudo docker run --rm -d --name cassandra --hostname cassandra -p 9042:9042 -p 9160:9160 --network cassandra cassandra
+      sudo docker run --rm --network host -v "vagrant_data/create_db_userapi.cql" -e CQLSH_HOST=cassandra -e CQLSH_PORT=9042 -e CQLVERSION=3.4.5 nuvo/docker-cqlsh
+      SHELL
+
+    cassandraVM.vm.provision "shell", run: "always", inline: <<-SHELL
+      sudo docker run --rm -d --name cassandra --hostname cassandra -p 9042:9042 -p 9160:9160 --network cassandra cassandra
+      SHELL
     
-    echo "<------ POSTGRES CONFIGURATION ------>"
-
-    sudo sed -i "s/#listen_address.*/listen_addresses '*'/" /etc/postgresql/9.3/main/postgresql.conf
-    sudo cp /vagrant_data/pg_hba.conf /etc/postgresql/9.3/main/ 
-
-    sudo service postgresql restart
-
-  SHELL
+  end
 end

@@ -10,7 +10,7 @@ var (
 	DBPassword = "userapi"
 	DBName     = "userapi"
 	DBHost     = "192.168.33.30"
-	DBPort     = "5432"
+	DBPort     = "8221"
 	DBType     = "postgres"
 )
 
