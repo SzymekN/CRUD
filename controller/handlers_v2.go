@@ -26,7 +26,7 @@ func SaveUserCassandra(c echo.Context) error {
 	return c.JSON(http.StatusOK, u)
 }
 
-//	e.PUT("/api/v1/users/:id", updateUser)
+//	e.PUT("/api/v2/users/:id", updateUser)
 func UpdateUserCassandra(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
@@ -50,7 +50,7 @@ func UpdateUserCassandra(c echo.Context) error {
 	return c.JSON(http.StatusOK, u)
 }
 
-//	e.DELETE("/api/v1/users/:id", deleteUser)
+//	e.DELETE("/api/v2/users/:id", deleteUser)
 func DeleteUserCassandra(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
@@ -66,7 +66,7 @@ func DeleteUserCassandra(c echo.Context) error {
 	return c.String(http.StatusOK, `"message":"user deleted"`)
 }
 
-// e.GET("/api/v1/users/:id", getUser)
+// e.GET("/api/v2/users/:id", getUser)
 func GetUserByIdCassandra(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
@@ -84,7 +84,7 @@ func GetUserByIdCassandra(c echo.Context) error {
 	return c.JSON(http.StatusOK, u)
 }
 
-// e.GET("/api/v1/users", getUsers)
+// e.GET("/api/v2/users", getUsers)
 func GetUsersCassandra(c echo.Context) error {
 	users := []model.User{}
 	u := model.User{}

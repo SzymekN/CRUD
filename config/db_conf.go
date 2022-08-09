@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	DBUser     = ""
+	DBUser     = "userapi"
 	DBPassword = "userapi"
 	DBName     = "userapi"
-	DBHost     = "192.168.33.30"
-	DBPort     = "8221"
+	DBHost     = "192.168.33.50"
+	DBPort     = "5432"
 	DBType     = "postgres"
 )
 
@@ -31,9 +31,9 @@ func readEnv() {
 		DBName = os.Getenv("DB_NAME")
 	}
 
-	if os.Getenv("DB_HOST") != "" {
-		DBHost = os.Getenv("DB_HOST")
-	}
+	// if os.Getenv("DB_HOST") != "" {
+	// 	DBHost = os.Getenv("DB_HOST")
+	// }
 
 	if os.Getenv("DB_PORT") != "" {
 		DBPort = os.Getenv("DB_PORT")

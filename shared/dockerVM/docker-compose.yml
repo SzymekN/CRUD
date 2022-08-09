@@ -1,0 +1,38 @@
+version: '3.9'
+
+# networks:
+#   cassandra:
+
+services:
+  cassandra:
+    image: cassandra
+    container_name: cassandra
+    restart: always
+    ports:
+      - 9042:9042
+      - 9160:9160
+    # networks:
+      # - cassandra
+    volumes:
+      - /cassandra/data:/var/lib/cassandra
+      - /vagrant_data:/shared
+    environment:
+      - CASSANDRA_CLUSTER_NAME=userapi
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    # command: /bin/bash -c "sleep 60 && cqlsh cassandra -f /shared/create_db_userapi.cql"
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=userapi
+      - POSTGRES_PASSWORD=userapi
+    ports:
+      - '5432:5432'
+    volumes: 
+      - /postgres/data:/var/lib/postgresql/data
+      - /vagrant_data:/shared
