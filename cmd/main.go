@@ -1,8 +1,8 @@
 package main
 
 import (
-	controller "crud/controller"
-	"crud/storage"
+	"crud/pkg/controller"
+	"crud/pkg/storage"
 	"os"
 )
 
