@@ -36,3 +36,22 @@ services:
     volumes: 
       - /postgres/data:/var/lib/postgresql/data
       - /vagrant_data:/shared
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  userapi:
+    depends_on:
+      cassandra:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    image: userapi
+    container_name: userapi
+    restart: always
+    # environment:
+    #   - POSTGRES_USER=userapi
+    #   - POSTGRES_PASSWORD=userapi
+    ports:
+      - '8200:8200'
