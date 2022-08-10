@@ -1,7 +1,7 @@
 package seeder
 
 import (
-	"crud/model"
+	"crud/pkg/model"
 	"fmt"
 	"log"
 
@@ -33,9 +33,11 @@ func All() []Seed {
 	}
 }
 
-func CreateAndSeed(db *gorm.DB) {
+func CreateAndSeed(db *gorm.DB, forceSeed bool) {
 
-	if db.HasTable("users") {
+	tableExists := db.HasTable("users")
+	if forceSeed && tableExists {
+
 		err := db.DropTable("users").Error
 
 		if err != nil {

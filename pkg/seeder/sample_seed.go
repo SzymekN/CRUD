@@ -1,6 +1,6 @@
 package seeder
 
-import "crud/model"
+import "crud/pkg/model"
 
 var (
 	Users = []*model.User{

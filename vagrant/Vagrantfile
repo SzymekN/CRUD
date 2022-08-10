@@ -138,7 +138,7 @@ Vagrant.configure("2") do |config|
       sudo docker network create cassandra
       sudo mkdir -p /cassandra/data
       sudo docker run --rm -d --name cassandra --hostname cassandra -v /cassandra/data:/var/lib/cassandra -p 9042:9042 -p 9160:9160 --network cassandra cassandra
-      sudo docker run --rm --network host -v "vagrant_data/create_db_userapi.cql" -e CQLSH_HOST=cassandra -e CQLSH_PORT=9042 -e CQLVERSION=3.4.5 nuvo/docker-cqlsh
+      sudo docker run --rm --network cassandra -v "/vagrant_data/shared/create_db_userapi.cql:/scripts/data.cql" -e CQLSH_HOST=cassandra -e CQLSH_PORT=9042 -e CQLVERSION=3.4.5 nuvo/docker-cqlsh
       #sudo docker run --rm -it --network cassandra nuvo/docker-cqlsh cqlsh cassandra 9042 --cqlversion='3.4.5'
       SHELL
 
@@ -170,20 +170,29 @@ Vagrant.configure("2") do |config|
     dockerVM.vm.provision "shell", inline: <<-SHELL
       apt-get update
 
+      echo "<--- DOCKER INSTALL --->"
       curl -fsSL https://get.docker.com -o get-docker.sh
       DRY_RUN=1 sudo sh ./get-docker.sh
+
+      echo "<--- CREATE DIRECTORIES --->"
       sudo mkdir -p /cassandra/data
       sudo mkdir -p /postgres/data
-      # sudo docker network create cassandra
       
-      # sudo docker pull cassandra
-      # sudo docker run --rm -d --name cassandra --hostname cassandra -v /cassandra/data:/var/lib/cassandra -p 9042:9042 -p 9160:9160 --network cassandra cassandra
-      # sudo docker run --rm --network host -v "vagrant_data/create_db_userapi.cql" -e CQLSH_HOST=cassandra -e CQLSH_PORT=9042 -e CQLVERSION=3.4.5 nuvo/docker-cqlsh
-      #sudo docker run --rm -it --network cassandra nuvo/docker-cqlsh cqlsh cassandra 9042 --cqlversion='3.4.5'
+      echo "<--- IMPORT SAMPLE DATABASE TO CASSANDRA --->"
+      sudo docker network create cassandra
+      sudo docker pull cassandra
+      sudo docker run --rm -d --name cassandra --hostname cassandra -v /cassandra/data:/var/lib/cassandra -p 9042:9042 -p 9160:9160 -e CASSANDRA_CLUSTER_NAME=userapi --network cassandra cassandra
+      sleep 60
+      sudo docker run --rm --network cassandra -v "/vagrant_data/shared/create_db_userapi.cql:/scripts/data.cql" -e CQLSH_HOST=cassandra -e CQLSH_PORT=9042 -e CQLVERSION=3.4.5 nuvo/docker-cqlsh
+      sudo docker kill cassandra
+      sudo docker image rm nuvo/docker-cqlsh
+      sudo docker network rm cassandra
       SHELL
-
-    dockerVM.vm.provision "shell", run: "always", inline: <<-SHELL
-      echo "EVERY RUN PROVISION"
+      
+      dockerVM.vm.provision "shell", run: "always", inline: <<-SHELL
+      echo "<--- BUILDING APP --->"
+      sudo docker build --tag userapi /vagrant_data
+      echo "<--- RUNNING SERVICE --->"
       sudo docker compose -f /vagrant_data/shared/dockerVM/docker-compose.yml up -d
       SHELL
     

@@ -37,7 +37,7 @@ services:
       - /postgres/data:/var/lib/postgresql/data
       - /vagrant_data:/shared
     healthcheck:
-      test: ["CMD", "pg_isready"]
+      test: ["CMD", "pg_isready", "-U" ,"userapi"]
       interval: 10s
       timeout: 5s
       retries: 5

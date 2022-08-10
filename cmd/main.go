@@ -2,6 +2,7 @@ package main
 
 import (
 	"crud/pkg/controller"
+	"crud/pkg/seeder"
 	"crud/pkg/storage"
 	"os"
 )
@@ -20,7 +21,9 @@ func main() {
 		}
 	}
 
-	// seeder.CreateAndSeed(storage.GetDBInstance())
+	// if len(os.Args) > 1 {
+	seeder.CreateAndSeed(storage.GetDBInstance(), true)
+	// }
 
 	e.Logger.Fatal(e.Start(port))
 }

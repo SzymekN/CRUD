@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"crud/model"
-	storage "crud/storage"
+	"crud/pkg/model"
+	"crud/pkg/storage"
 
 	"github.com/gocql/gocql"
 	"github.com/labstack/echo/v4"
