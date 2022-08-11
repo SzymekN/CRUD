@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	DBUser     = "userapi"
-	DBPassword = "userapi"
-	DBName     = "userapi"
-	DBHost     = "192.168.33.50"
-	DBPort     = "5432"
+	PGUser     = "userapi"
+	PGPassword = "userapi"
+	PGName     = "userapi"
+	PGHost     = "192.168.33.50"
+	PGPort     = "5432"
 	DBType     = "postgres"
 )
 
@@ -19,24 +19,24 @@ func GetDBType() string {
 }
 
 func readEnv() {
-	if os.Getenv("DB_USER") != "" {
-		DBUser = os.Getenv("DB_USER")
+	if os.Getenv("PG_USER") != "" {
+		PGUser = os.Getenv("PG_USER")
 	}
 
-	if os.Getenv("DB_PASSWORD") != "" {
-		DBPassword = os.Getenv("DB_PASSWORD")
+	if os.Getenv("PG_PASSWORD") != "" {
+		PGPassword = os.Getenv("PG_PASSWORD")
 	}
 
-	if os.Getenv("DB_NAME") != "" {
-		DBName = os.Getenv("DB_NAME")
+	if os.Getenv("PG_NAME") != "" {
+		PGName = os.Getenv("PG_NAME")
 	}
 
-	// if os.Getenv("DB_HOST") != "" {
-	// 	DBHost = os.Getenv("DB_HOST")
-	// }
+	if os.Getenv("PG_HOST") != "" {
+		PGHost = os.Getenv("PG_HOST")
+	}
 
-	if os.Getenv("DB_PORT") != "" {
-		DBPort = os.Getenv("DB_PORT")
+	if os.Getenv("PG_PORT") != "" {
+		PGPort = os.Getenv("PG_PORT")
 	}
 }
 
@@ -44,10 +44,10 @@ func GetPostgresConnectionString() string {
 
 	readEnv()
 	dataBase := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
-		DBHost,
-		DBPort,
-		DBUser,
-		DBName,
-		DBPassword)
+		PGHost,
+		PGPort,
+		PGUser,
+		PGName,
+		PGPassword)
 	return dataBase
 }
