@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option go_package = "https://github.com/SzymekN/CRUD/tree/main/pkg/grpc";
+
+package grpc;
+
+service Userapi{
+
+    rpc GetUser (UserRequest) returns (UserReply){}
+
+}
+
+message UserRequest{
+    int64 id = 1;
+}
+
+message UserPost{
+    string firstname = 2;
+    string lastname = 3;
+    int64 age = 4;
+}
+
+message UserPut{
+    int64 id = 1;
+    string firstname = 2;
+    string lastname = 3;
+    int64 age = 4;
+}
+
+message UserReply{
+    int64 id = 1;
+    string firstname = 2;
+    string lastname = 3;
+    int64 age = 4;
+}
