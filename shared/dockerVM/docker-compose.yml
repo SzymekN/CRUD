@@ -41,7 +41,7 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-    image: userapi
+    build: /vagrant_data
     container_name: userapi
     restart: always
     ports:

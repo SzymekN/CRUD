@@ -13,7 +13,7 @@ COPY pkg/ ./pkg
 RUN go build -o /userapi
 
 ## Deploy
-FROM alpine:latest
+FROM alpine:3.16
 WORKDIR /
 COPY --from=build /userapi /userapi
 EXPOSE 8200
