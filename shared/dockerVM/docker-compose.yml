@@ -46,6 +46,7 @@ services:
     restart: always
     ports:
       - '8200:8200'
+      - '8201:8201'
     environment:
       - PG_HOST=postgres
       - CASSANDRA_HOST=cassandra

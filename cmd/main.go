@@ -1,19 +1,20 @@
 package main
 
 import (
+	"crud/pkg/controller"
 	"crud/pkg/grpc"
 	"crud/pkg/storage"
 )
 
 func main() {
 
-	// e := controller.SetupRouter()
+	e := controller.SetupRouter()
 	storage.CreateCassandraSession()
-	grpc.CreateGRPCServer()
-	// storage.NewDB()
+	go grpc.CreateGRPCServer()
+	storage.NewDB()
 
 	// seeder.CreateAndSeed(storage.GetDBInstance(), true)
 
-	// e.Logger.Fatal(e.Start(":8200"))
+	e.Logger.Fatal(e.Start(":8200"))
 
 }
