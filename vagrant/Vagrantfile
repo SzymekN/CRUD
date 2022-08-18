@@ -191,7 +191,10 @@ Vagrant.configure("2") do |config|
       dockerVM.vm.provision "shell", run: "always", inline: <<-SHELL
       # echo "<--- BUILDING APP --->"
       # sudo docker build --tag userapi /vagrant_data
+      # echo "<--- RUNNING DOCUMENTATION --->"
+      # make
       echo "<--- RUNNING SERVICE --->"
+      sudo docker compose -f /vagrant_data/shared/dockerVM/docker-compose.yml build
       sudo docker compose -f /vagrant_data/shared/dockerVM/docker-compose.yml up -d
       SHELL
     
