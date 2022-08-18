@@ -3,7 +3,7 @@ package storage
 import (
 	"log"
 
-	"crud/pkg/config"
+	"github.com/SzymekN/CRUD/pkg/config"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"

@@ -1,9 +1,10 @@
 package seeder
 
 import (
-	"crud/pkg/model"
 	"fmt"
 	"log"
+
+	"github.com/SzymekN/CRUD/pkg/model"
 
 	"github.com/jinzhu/gorm"
 )

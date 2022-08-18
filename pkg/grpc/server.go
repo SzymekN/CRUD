@@ -2,12 +2,13 @@ package grpc
 
 import (
 	"context"
-	"crud/pkg/controller"
-	"crud/pkg/model"
 	"flag"
 	"fmt"
 	"log"
 	"net"
+
+	"github.com/SzymekN/CRUD/pkg/controller"
+	"github.com/SzymekN/CRUD/pkg/model"
 
 	"google.golang.org/grpc"
 	_ "google.golang.org/grpc/credentials/insecure"

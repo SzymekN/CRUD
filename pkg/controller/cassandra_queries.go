@@ -1,9 +1,10 @@
 package controller
 
 import (
-	"crud/pkg/model"
-	"crud/pkg/storage"
 	"fmt"
+
+	"github.com/SzymekN/CRUD/pkg/model"
+	"github.com/SzymekN/CRUD/pkg/storage"
 
 	"github.com/gocql/gocql"
 )

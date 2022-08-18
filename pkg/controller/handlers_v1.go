@@ -4,29 +4,49 @@ import (
 	"net/http"
 	"strconv"
 
-	"crud/pkg/model"
-	"crud/pkg/storage"
+	"github.com/SzymekN/CRUD/pkg/model"
+	"github.com/SzymekN/CRUD/pkg/storage"
 
 	"github.com/labstack/echo/v4"
 )
 
-//	e.POST("/api/v1/users/save", saveUser)
+// swagger:route POST /api/v1/users/save users_v1 postUserV1
+// Save user to postgres database.
+//	Consumes:
+//    - application/json
+//  Produces:
+//    - application/json
+//
+// responses:
+// 		200: userResponse
+//		500: errorResponse
 func SaveUser(c echo.Context) error {
 	var u model.User
 	if err := c.Bind(&u); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusInternalServerError, &model.GenericError{Message: "couldn't update users"})
 	}
 	db := storage.GetDBInstance()
 	db.Create(&u)
 	return c.JSON(http.StatusOK, u)
 }
 
-//	e.PUT("/api/v1/users/:id", updateUser)
+// swagger:route PUT /api/v1/user/{id} users_v1 putUserV1
+// Updates user in postgres database.
+//	Consumes:
+//    - application/json
+//  Produces:
+//    - application/json
+//
+// responses:
+// 		200: userResponse
+//		400: errorResponse
+//		404: errorResponse
+//		500: errorResponse
 func UpdateUser(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		return c.String(http.StatusBadRequest, `"error":"id not valid"`)
+		return c.JSON(http.StatusBadRequest, &model.GenericError{Message: `"error":"incorrect id"`})
 	}
 
 	db := storage.GetDBInstance()
@@ -34,46 +54,62 @@ func UpdateUser(c echo.Context) error {
 	result := db.Find(&user, id)
 
 	if result.RowsAffected < 1 {
-		return c.String(http.StatusBadRequest, `"error":"user not found"`)
+		return c.JSON(http.StatusNotFound, &model.GenericError{Message: "user doesn't exist"})
 	}
 
 	if err := c.Bind(&user); err != nil {
-		return c.String(http.StatusBadRequest, `"error":"couldn't update user"`)
+		return c.JSON(http.StatusInternalServerError, &model.GenericError{Message: "couldn't update users"})
 	}
 
 	user.Id = id
 	result = db.Save(&user)
 	if result.RowsAffected < 1 {
-		return c.String(http.StatusBadRequest, `"error":"couldn't update user"`)
+		return c.JSON(http.StatusInternalServerError, &model.GenericError{Message: "couldn't update users"})
 	}
 
 	return c.JSON(http.StatusOK, user)
 }
 
-//	e.DELETE("/api/v1/users/:id", deleteUser)
+// swagger:route DELETE /api/v1/user/{id} users_v1 deleteUserV1
+// deletes user from postgres database.
+//  Produces:
+//    - application/json
+//
+// responses:
+// 		200: messageResponse
+//		400: errorResponse
+//		404: errorResponse
 func DeleteUser(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		return c.String(http.StatusBadRequest, `"error":"user with given id doesn't exist"`)
+		return c.JSON(http.StatusBadRequest, &model.GenericError{Message: `"error":"incorrect id"`})
 	}
 
 	db := storage.GetDBInstance()
 	result := db.Delete(&model.User{}, id)
 
 	if result.RowsAffected < 1 {
-		return c.String(http.StatusBadRequest, `"error":"user with given id doesn't exist"`)
+		return c.JSON(http.StatusNotFound, &model.GenericError{Message: "couldn't get user"})
 	}
 
-	return c.String(http.StatusOK, `"message":"user deleted"`)
+	return c.JSON(http.StatusOK, &model.GenericMessage{Message: "user deleted"})
 }
 
-// e.GET("/api/v1/users/:id", getUser)
+// swagger:route GET /api/v1/user/{id} users_v1 getUserV1
+// Gets user from postgres database.
+//  Produces:
+//    - application/json
+//
+// responses:
+// 		200: userResponse
+//		400: errorResponse
+//		404: errorResponse
 func GetUserById(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
-		return c.String(http.StatusBadRequest, `"error":"user with given id doesn't exist"`)
+		return c.JSON(http.StatusBadRequest, &model.GenericError{Message: `"error":"incorrect id"`})
 	}
 
 	db := storage.GetDBInstance()
@@ -81,19 +117,27 @@ func GetUserById(c echo.Context) error {
 	result := db.Find(&user, id)
 
 	if result.RowsAffected < 1 {
-		return c.String(http.StatusBadRequest, `"error":"user with given id doesn't exist"`)
+		return c.JSON(http.StatusNotFound, &model.GenericError{Message: "couldn't get user"})
 	}
 
 	return c.JSON(http.StatusOK, user)
 }
 
-// e.GET("/api/v1/users", getUsers)
+// swagger:route GET /api/v1/users users_v1 listUsersV1
+// Gets user from postgres database.
+//
+//  Produces:
+//    - application/json
+//
+// responses:
+// 		200: usersResponse
+//		500: errorResponse
 func GetUsers(c echo.Context) error {
 	db := storage.GetDBInstance()
 	users := []model.User{}
 
 	if err := db.Find(&users).Error; err != nil {
-		return nil
+		return c.JSON(http.StatusInternalServerError, &model.GenericError{Message: "couldn't get users"})
 	}
 
 	return c.JSON(http.StatusOK, users)

@@ -1,6 +1,6 @@
 package seeder
 
-import "crud/pkg/model"
+import "github.com/SzymekN/CRUD/pkg/model"
 
 var (
 	Users = []*model.User{
