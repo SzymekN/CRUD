@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/mvrilo/go-redoc"
 	echoredoc "github.com/mvrilo/go-redoc/echo"
 )
@@ -14,17 +15,23 @@ func SetupRouter() *echo.Echo {
 		return c.String(http.StatusOK, `{"message":"Hello World!"}`)
 	})
 
-	e.GET("/api/v1/users/:id", GetUserById)
-	e.GET("/api/v1/users", GetUsers)
-	e.POST("/api/v1/users/save", SaveUser)
-	e.PUT("/api/v1/users/:id", UpdateUser)
-	e.DELETE("/api/v1/users/:id", DeleteUser)
+	e.POST("/api/v2/operators/signup", SignUp)
+	e.GET("/api/v2/operators/signin", SignIn)
 
-	e.GET("/api/v2/users/:id", GetUserByIdCassandraHandler)
-	e.GET("/api/v2/users", GetUsersCassandraHandler)
-	e.POST("/api/v2/users/save", SaveUserCassandraHandler)
-	e.PUT("/api/v2/users/:id", UpdateUserCassandraHandler)
-	e.DELETE("/api/v2/users/:id", DeleteUserCassandraHandler)
+	auth := e.Group("")
+	auth.Use(middleware.JWT([]byte(Secretkey)))
+
+	auth.GET("/api/v1/users/:id", GetUserById)
+	auth.GET("/api/v1/users", GetUsers)
+	auth.POST("/api/v1/users/save", SaveUser)
+	auth.PUT("/api/v1/users/:id", UpdateUser, isAdmin)
+	auth.DELETE("/api/v1/users/:id", DeleteUser, isAdmin)
+
+	auth.GET("/api/v2/users/:id", GetUserByIdCassandraHandler)
+	auth.GET("/api/v2/users", GetUsersCassandraHandler)
+	auth.POST("/api/v2/users/save", SaveUserCassandraHandler, isAdmin)
+	auth.PUT("/api/v2/users/:id", UpdateUserCassandraHandler, isAdmin)
+	auth.DELETE("/api/v2/users/:id", DeleteUserCassandraHandler, isAdmin)
 
 	// redoc documentation middleware
 	doc := redoc.Redoc{
