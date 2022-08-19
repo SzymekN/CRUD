@@ -28,8 +28,8 @@ func SetupRouter() *echo.Echo {
 
 	// redoc documentation middleware
 	doc := redoc.Redoc{
-		Title:       "Example API",
-		Description: "Example API Description",
+		Title:       "User API",
+		Description: "API for interactions with database",
 		SpecFile:    "docs/swagger.json",
 		SpecPath:    "docs/swagger.json",
 		DocsPath:    "/docs",

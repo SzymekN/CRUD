@@ -44,8 +44,6 @@ services:
     build: /vagrant_data
     container_name: userapi
     restart: always
-    volumes: 
-      - /vagrant_data/docs:/docs
     ports:
       - '8200:8200'
       - '8201:8201'
