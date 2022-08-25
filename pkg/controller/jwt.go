@@ -18,7 +18,7 @@ var Secretkey string = "tokluczjestjakis"
 
 type Operator struct {
 	Username string `json:"username" form:"username"`
-	Email    string `gorm:"unique" json:"email" form:"email"`
+	Email    string `json:"email" form:"email"`
 	Password string `json:"password" form:"password"`
 	Role     string `json:"role" form:"role"`
 }

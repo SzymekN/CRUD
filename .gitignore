@@ -3,3 +3,4 @@
 .vscode/dryrun.log
 .vscode/targets.log
 bfg.jar
+.vagrant/

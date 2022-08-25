@@ -22,3 +22,5 @@ CREATE TABLE IF NOT EXISTS userapi.operators (
     password text,
     role text
     );
+
+insert into userapi.operators(username, email,password, role) values('asd, 'asd@asd', 'asd', 'admin');
