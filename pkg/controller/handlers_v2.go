@@ -1,11 +1,11 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/SzymekN/CRUD/pkg/model"
+	"github.com/SzymekN/CRUD/pkg/producer"
 
 	"github.com/labstack/echo/v4"
 )
@@ -22,11 +22,32 @@ import (
 //		500: errorResponse
 func SaveUserCassandraHandler(c echo.Context) error {
 	var u model.User
+
+	var k, msg string
+	var status int
+
+	defer func() {
+		producer.ProduceMessage(k, msg)
+	}()
+
 	if err := c.Bind(&u); err != nil {
-		return c.JSON(http.StatusInternalServerError, &model.GenericError{Message: "couldn't update users"})
+		status = http.StatusBadRequest
+		msg = "[" + k + "] POST error: incorrect parameters, HTTP: " + strconv.Itoa(status)
+		return c.JSON(status, &model.GenericError{Message: msg})
 	}
-	SaveUserCassandra(u)
-	return c.JSON(http.StatusOK, u)
+
+	k = strconv.Itoa(u.Id)
+	err := SaveUserCassandra(u)
+	if err != nil {
+		status = http.StatusInternalServerError
+		msg = "[" + k + "] POST error: post query error, HTTP: " + strconv.Itoa(status)
+		return c.JSON(status, &model.GenericError{Message: msg})
+	}
+
+	status = http.StatusOK
+	msg = "[" + k + "] POST completed: user added, HTTP: " + strconv.Itoa(status)
+	c.JSON(http.StatusOK, u)
+	return nil
 }
 
 // swagger:route PUT /api/v2/user/{id} users_v2 putUserV2
@@ -44,28 +65,47 @@ func SaveUserCassandraHandler(c echo.Context) error {
 func UpdateUserCassandraHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
+	var k, msg string
+	var status int
+
+	defer func() {
+		producer.ProduceMessage(k, msg)
+		// if err != nil {
+
+		// }
+	}()
+
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &model.GenericError{Message: `"error":"incorrect id"`})
+		k = "unknown"
+		status = http.StatusBadRequest
+		msg = "[" + k + "] PUT error: incorrect id, HTTP: " + strconv.Itoa(status)
+		return c.JSON(status, &model.GenericError{Message: msg})
 	}
 
+	k = strconv.Itoa(id)
 	u, err := GetUserByIdCassandra(id)
 	if err != nil {
-		fmt.Println(err)
-		return c.JSON(http.StatusNotFound, &model.GenericError{Message: "user doesn't exist"})
+		status = http.StatusNotFound
+		msg = "[" + k + "] PUT error: user doesn't exist, HTTP: " + strconv.Itoa(status)
+		return c.JSON(status, &model.GenericError{Message: msg})
 	}
 
 	if err := c.Bind(&u); err != nil {
-		fmt.Println(err)
-		return c.JSON(http.StatusInternalServerError, &model.GenericError{Message: "couldn't update users"})
+		status = http.StatusBadRequest
+		msg = "[" + k + "] PUT error: incorrect parameters, HTTP: " + strconv.Itoa(status)
+		return c.JSON(status, &model.GenericError{Message: msg})
 	}
 
 	err = UpdateUserCassandra(id, u)
 
 	if err != nil {
-		fmt.Println(err)
-		return c.JSON(http.StatusInternalServerError, &model.GenericError{Message: "couldn't update users"})
+		status = http.StatusInternalServerError
+		msg = "[" + k + "] PUT error: update query error, HTTP: " + strconv.Itoa(status)
+		return c.JSON(status, &model.GenericError{Message: msg})
 	}
 
+	status = http.StatusOK
+	msg = "[" + k + "] PUT completed: user updated, HTTP: " + strconv.Itoa(status)
 	return c.JSON(http.StatusOK, u)
 }
 
@@ -81,17 +121,32 @@ func UpdateUserCassandraHandler(c echo.Context) error {
 func DeleteUserCassandraHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
+	var k, msg string
+	var status int
+
+	defer func() {
+		producer.ProduceMessage(k, msg)
+	}()
+
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &model.GenericError{Message: `"error":"incorrect id"`})
+		k = "unknown"
+		status = http.StatusBadRequest
+		msg = "[" + k + "] DEL error: incorrect id, HTTP: " + strconv.Itoa(status)
+		return c.JSON(status, &model.GenericError{Message: msg})
 	}
 
 	_, err = DeleteUserCassandra(id)
+	k = strconv.Itoa(id)
 
 	if err != nil {
-		return c.JSON(http.StatusNotFound, &model.GenericError{Message: "couldn't get user"})
+		status = http.StatusNotFound
+		msg = "[" + k + "] DEL error: user doesn't exist, HTTP: " + strconv.Itoa(status)
+		return c.JSON(status, &model.GenericError{Message: msg})
 	}
 
-	return c.JSON(http.StatusOK, &model.GenericMessage{Message: "user deleted"})
+	status = http.StatusOK
+	msg = "[" + k + "] DEL completed: user deleted, HTTP: " + strconv.Itoa(status)
+	return c.JSON(status, &model.GenericMessage{Message: msg})
 }
 
 // swagger:route GET /api/v2/user/{id} users_v2 getUserV2
@@ -106,16 +161,31 @@ func DeleteUserCassandraHandler(c echo.Context) error {
 func GetUserByIdCassandraHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
+	var k, msg string
+	var status int
+
+	defer func() {
+		producer.ProduceMessage(k, msg)
+	}()
+
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &model.GenericError{Message: `"error":"incorrect id"`})
+		k = "unknown"
+		status = http.StatusBadRequest
+		msg = "[" + k + "] GET error: incorrect id, HTTP: " + strconv.Itoa(status)
+		return c.JSON(status, &model.GenericError{Message: msg})
 	}
 
+	k = strconv.Itoa(id)
 	u, err := GetUserByIdCassandra(id)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, &model.GenericError{Message: "couldn't get user"})
+		status = http.StatusNotFound
+		msg = "[" + k + "] GET error: couldn't get user, HTTP: " + strconv.Itoa(status)
+		return c.JSON(status, &model.GenericError{Message: msg})
 	}
 
-	return c.JSON(http.StatusOK, u)
+	status = http.StatusOK
+	msg = "[" + k + "] GET completed: user read, HTTP: " + strconv.Itoa(status)
+	return c.JSON(status, u)
 }
 
 // swagger:route GET /api/v2/users users_v2 getUsersV2
@@ -130,8 +200,22 @@ func GetUserByIdCassandraHandler(c echo.Context) error {
 func GetUsersCassandraHandler(c echo.Context) error {
 
 	users, err := GetUsersCassandra()
+
+	var k, msg string
+	var status int
+
+	defer func() {
+		producer.ProduceMessage(k, msg)
+	}()
+
+	k = "all"
 	if err != nil {
-		return c.String(http.StatusBadRequest, `"error":"couldn't get users"`)
+		status = http.StatusNotFound
+		msg = "[" + k + "] GET error: couldn't get users, HTTP: " + strconv.Itoa(status)
+		return c.JSON(status, &model.GenericError{Message: msg})
 	}
+
+	status = http.StatusOK
+	msg = "[" + k + "] GET completed: users read, HTTP: " + strconv.Itoa(status)
 	return c.JSON(http.StatusOK, users)
 }

@@ -1,3 +1,3 @@
 sudo docker kill userapi
 sudo docker compose build
-sudo docker compose up userapi 
+sudo docker compose up -d userapi

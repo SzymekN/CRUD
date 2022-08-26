@@ -6,8 +6,7 @@ services:
     ports:
       - "2181:2181"
     volumes:
-      - "/zookeeper/data:/var/lib/zookeeper/data"
-      - "/zookeeper/logs:/var/lib/zookeeper/log"
+      - "/zookeeper:/bitnami/"
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
   kafka:
@@ -16,7 +15,8 @@ services:
     ports:
       - "9092:9092"
     volumes:
-      - "/kafka/data:/var/lib/kafka/data"
+      - "/kafka:/bitnami/kafka/data"
+    # user: "root"
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
@@ -24,6 +24,7 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://192.168.33.50:9092
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
     depends_on:
       - zookeeper
     # command: sh -c "/opt/bitnami/kafka/bin/windows/kafka-topics.sh --create --bootstrap-server kafka-kafka-1:9092 --replication-factor 1 --partitions 1 --topic messages"

@@ -4,3 +4,8 @@
 .vscode/targets.log
 bfg.jar
 .vagrant/
+vagrant/.vagrant/machines/dockerVM/virtualbox/action_provision
+vagrant/.vagrant/machines/dockerVM/virtualbox/action_set_name
+vagrant/.vagrant/machines/dockerVM/virtualbox/id
+vagrant/.vagrant/machines/dockerVM/virtualbox/index_uuid
+vagrant/.vagrant/machines/dockerVM/virtualbox/private_key
