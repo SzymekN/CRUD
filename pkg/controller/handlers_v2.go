@@ -22,30 +22,33 @@ import (
 //		500: errorResponse
 func SaveUserCassandraHandler(c echo.Context) error {
 	var u model.User
-
-	var k, msg string
+	var err error
 	var status int
+	k, msg := "", "userapi.users"
 
 	defer func() {
 		producer.ProduceMessage(k, msg)
+		if err != nil {
+			c.JSON(status, &model.GenericError{Message: msg})
+		}
 	}()
 
 	if err := c.Bind(&u); err != nil {
 		status = http.StatusBadRequest
-		msg = "[" + k + "] POST error: incorrect parameters, HTTP: " + strconv.Itoa(status)
-		return c.JSON(status, &model.GenericError{Message: msg})
+		msg += "[" + k + "] POST error: incorrect parameters, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
 	k = strconv.Itoa(u.Id)
-	err := SaveUserCassandra(u)
+	err = SaveUserCassandra(u)
 	if err != nil {
 		status = http.StatusInternalServerError
-		msg = "[" + k + "] POST error: post query error, HTTP: " + strconv.Itoa(status)
-		return c.JSON(status, &model.GenericError{Message: msg})
+		msg += "[" + k + "] POST error: post query error, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
 	status = http.StatusOK
-	msg = "[" + k + "] POST completed: user added, HTTP: " + strconv.Itoa(status)
+	msg += "[" + k + "] POST completed: user added, HTTP: " + strconv.Itoa(status)
 	c.JSON(http.StatusOK, u)
 	return nil
 }
@@ -64,48 +67,48 @@ func SaveUserCassandraHandler(c echo.Context) error {
 //		500: errorResponse
 func UpdateUserCassandraHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
+	k, msg := "", "userapi.users"
 
-	var k, msg string
 	var status int
 
 	defer func() {
 		producer.ProduceMessage(k, msg)
-		// if err != nil {
-
-		// }
+		if err != nil {
+			c.JSON(status, &model.GenericError{Message: msg})
+		}
 	}()
 
 	if err != nil {
 		k = "unknown"
 		status = http.StatusBadRequest
-		msg = "[" + k + "] PUT error: incorrect id, HTTP: " + strconv.Itoa(status)
-		return c.JSON(status, &model.GenericError{Message: msg})
+		msg += "[" + k + "] PUT error: incorrect id, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
 	k = strconv.Itoa(id)
 	u, err := GetUserByIdCassandra(id)
 	if err != nil {
 		status = http.StatusNotFound
-		msg = "[" + k + "] PUT error: user doesn't exist, HTTP: " + strconv.Itoa(status)
-		return c.JSON(status, &model.GenericError{Message: msg})
+		msg += "[" + k + "] PUT error: user doesn't exist, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
 	if err := c.Bind(&u); err != nil {
 		status = http.StatusBadRequest
-		msg = "[" + k + "] PUT error: incorrect parameters, HTTP: " + strconv.Itoa(status)
-		return c.JSON(status, &model.GenericError{Message: msg})
+		msg += "[" + k + "] PUT error: incorrect parameters, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
 	err = UpdateUserCassandra(id, u)
 
 	if err != nil {
 		status = http.StatusInternalServerError
-		msg = "[" + k + "] PUT error: update query error, HTTP: " + strconv.Itoa(status)
-		return c.JSON(status, &model.GenericError{Message: msg})
+		msg += "[" + k + "] PUT error: update query error, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
 	status = http.StatusOK
-	msg = "[" + k + "] PUT completed: user updated, HTTP: " + strconv.Itoa(status)
+	msg += "[" + k + "] PUT completed: user updated, HTTP: " + strconv.Itoa(status)
 	return c.JSON(http.StatusOK, u)
 }
 
@@ -120,19 +123,22 @@ func UpdateUserCassandraHandler(c echo.Context) error {
 //		404: errorResponse
 func DeleteUserCassandraHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
+	k, msg := "", "userapi.users"
 
-	var k, msg string
 	var status int
 
 	defer func() {
 		producer.ProduceMessage(k, msg)
+		if err != nil {
+			c.JSON(status, &model.GenericError{Message: msg})
+		}
 	}()
 
 	if err != nil {
 		k = "unknown"
 		status = http.StatusBadRequest
-		msg = "[" + k + "] DEL error: incorrect id, HTTP: " + strconv.Itoa(status)
-		return c.JSON(status, &model.GenericError{Message: msg})
+		msg += "[" + k + "] DEL error: incorrect id, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
 	_, err = DeleteUserCassandra(id)
@@ -140,12 +146,12 @@ func DeleteUserCassandraHandler(c echo.Context) error {
 
 	if err != nil {
 		status = http.StatusNotFound
-		msg = "[" + k + "] DEL error: user doesn't exist, HTTP: " + strconv.Itoa(status)
-		return c.JSON(status, &model.GenericError{Message: msg})
+		msg += "[" + k + "] DEL error: user doesn't exist, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
 	status = http.StatusOK
-	msg = "[" + k + "] DEL completed: user deleted, HTTP: " + strconv.Itoa(status)
+	msg += "[" + k + "] DEL completed: user deleted, HTTP: " + strconv.Itoa(status)
 	return c.JSON(status, &model.GenericMessage{Message: msg})
 }
 
@@ -161,30 +167,34 @@ func DeleteUserCassandraHandler(c echo.Context) error {
 func GetUserByIdCassandraHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 
-	var k, msg string
+	k, msg := "", "userapi.users"
+
 	var status int
 
 	defer func() {
 		producer.ProduceMessage(k, msg)
+		if err != nil {
+			c.JSON(status, &model.GenericError{Message: msg})
+		}
 	}()
 
 	if err != nil {
 		k = "unknown"
 		status = http.StatusBadRequest
-		msg = "[" + k + "] GET error: incorrect id, HTTP: " + strconv.Itoa(status)
-		return c.JSON(status, &model.GenericError{Message: msg})
+		msg += "[" + k + "] GET error: incorrect id, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
 	k = strconv.Itoa(id)
 	u, err := GetUserByIdCassandra(id)
 	if err != nil {
 		status = http.StatusNotFound
-		msg = "[" + k + "] GET error: couldn't get user, HTTP: " + strconv.Itoa(status)
-		return c.JSON(status, &model.GenericError{Message: msg})
+		msg += "[" + k + "] GET error: couldn't get user, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
 	status = http.StatusOK
-	msg = "[" + k + "] GET completed: user read, HTTP: " + strconv.Itoa(status)
+	msg += "[" + k + "] GET completed: user read, HTTP: " + strconv.Itoa(status)
 	return c.JSON(status, u)
 }
 
@@ -201,7 +211,8 @@ func GetUsersCassandraHandler(c echo.Context) error {
 
 	users, err := GetUsersCassandra()
 
-	var k, msg string
+	k, msg := "", "userapi.users"
+
 	var status int
 
 	defer func() {
@@ -211,11 +222,11 @@ func GetUsersCassandraHandler(c echo.Context) error {
 	k = "all"
 	if err != nil {
 		status = http.StatusNotFound
-		msg = "[" + k + "] GET error: couldn't get users, HTTP: " + strconv.Itoa(status)
-		return c.JSON(status, &model.GenericError{Message: msg})
+		msg += "[" + k + "] GET error: couldn't get users, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
 	status = http.StatusOK
-	msg = "[" + k + "] GET completed: users read, HTTP: " + strconv.Itoa(status)
+	msg += "[" + k + "] GET completed: users read, HTTP: " + strconv.Itoa(status)
 	return c.JSON(http.StatusOK, users)
 }

@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/SzymekN/CRUD/pkg/auth"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/mvrilo/go-redoc"
@@ -18,20 +19,20 @@ func SetupRouter() *echo.Echo {
 	e.POST("/api/v2/operators/signup", SignUp)
 	e.GET("/api/v2/operators/signin", SignIn)
 
-	auth := e.Group("")
-	auth.Use(middleware.JWT([]byte(Secretkey)))
+	jwt_auth := e.Group("")
+	jwt_auth.Use(middleware.JWT([]byte(auth.Secretkey)))
 
-	auth.GET("/api/v1/users/:id", GetUserById)
-	auth.GET("/api/v1/users", GetUsers)
-	auth.POST("/api/v1/users/save", SaveUser)
-	auth.PUT("/api/v1/users/:id", UpdateUser, isAdmin)
-	auth.DELETE("/api/v1/users/:id", DeleteUser, isAdmin)
+	jwt_auth.GET("/api/v1/users/:id", GetUserById)
+	jwt_auth.GET("/api/v1/users", GetUsers)
+	jwt_auth.POST("/api/v1/users/save", SaveUser)
+	jwt_auth.PUT("/api/v1/users/:id", UpdateUser, auth.IsAdmin)
+	jwt_auth.DELETE("/api/v1/users/:id", DeleteUser, auth.IsAdmin)
 
-	auth.GET("/api/v2/users/:id", GetUserByIdCassandraHandler)
-	auth.GET("/api/v2/users", GetUsersCassandraHandler)
-	auth.POST("/api/v2/users/save", SaveUserCassandraHandler, isAdmin)
-	auth.PUT("/api/v2/users/:id", UpdateUserCassandraHandler, isAdmin)
-	auth.DELETE("/api/v2/users/:id", DeleteUserCassandraHandler, isAdmin)
+	jwt_auth.GET("/api/v2/users/:id", GetUserByIdCassandraHandler)
+	jwt_auth.GET("/api/v2/users", GetUsersCassandraHandler)
+	jwt_auth.POST("/api/v2/users/save", SaveUserCassandraHandler, auth.IsAdmin)
+	jwt_auth.PUT("/api/v2/users/:id", UpdateUserCassandraHandler, auth.IsAdmin)
+	jwt_auth.DELETE("/api/v2/users/:id", DeleteUserCassandraHandler, auth.IsAdmin)
 
 	// redoc documentation middleware
 	doc := redoc.Redoc{
