@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/SzymekN/CRUD/pkg/model"
+	"github.com/SzymekN/CRUD/pkg/producer"
 	"github.com/SzymekN/CRUD/pkg/storage"
 
 	"github.com/labstack/echo/v4"
@@ -22,12 +24,35 @@ import (
 //		500: errorResponse
 func SaveUser(c echo.Context) error {
 	var u model.User
+	var err error
+	var status int
+	k, msg := "", "userapi_v1.users"
+
+	defer func() {
+		producer.ProduceMessage(k, msg)
+		if err != nil {
+			c.JSON(status, &model.GenericError{Message: msg})
+		}
+	}()
+
 	if err := c.Bind(&u); err != nil {
-		return c.JSON(http.StatusInternalServerError, &model.GenericError{Message: "couldn't update users"})
+		status = http.StatusBadRequest
+		msg += "[" + k + "] SaveUser error: incorrect parameters, HTTP: " + strconv.Itoa(status)
+		return err
 	}
+
+	k = strconv.Itoa(u.Id)
 	db := storage.GetDBInstance()
-	db.Create(&u)
-	return c.JSON(http.StatusOK, u)
+	err = db.Create(&u).Error
+	if err != nil {
+		status = http.StatusInternalServerError
+		msg += "[" + k + "] SaveUser error: post query error, HTTP: " + strconv.Itoa(status)
+		return err
+	}
+
+	status = http.StatusOK
+	msg += "[" + k + "] SaveUser completed: user added, HTTP: " + strconv.Itoa(status)
+	return c.JSON(status, u)
 }
 
 // swagger:route PUT /api/v1/user/{id} users_v1 putUserV1
@@ -44,30 +69,52 @@ func SaveUser(c echo.Context) error {
 //		500: errorResponse
 func UpdateUser(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
+	var status int
+	k, msg := "", "userapi_v1.users"
 
+	defer func() {
+		producer.ProduceMessage(k, msg)
+		if err != nil {
+			c.JSON(status, &model.GenericError{Message: msg})
+		}
+	}()
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &model.GenericError{Message: `"error":"incorrect id"`})
+		k = "unknown"
+		status = http.StatusBadRequest
+		msg += "[" + k + "] UpdateUser error: incorrect id, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
+	k = strconv.Itoa(id)
 	db := storage.GetDBInstance()
 	user := model.User{}
 	result := db.Find(&user, id)
 
 	if result.RowsAffected < 1 {
-		return c.JSON(http.StatusNotFound, &model.GenericError{Message: "user doesn't exist"})
+		status = http.StatusNotFound
+		msg += "[" + k + "] UpdateUser error: user doesn't exist, HTTP: " + strconv.Itoa(status)
+		err = errors.New("user doesn't exist")
+		return err
 	}
 
 	if err := c.Bind(&user); err != nil {
-		return c.JSON(http.StatusInternalServerError, &model.GenericError{Message: "couldn't update users"})
+		status = http.StatusBadRequest
+		msg += "[" + k + "] UpdateUser error: incorrect parameters, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
 	user.Id = id
 	result = db.Save(&user)
 	if result.RowsAffected < 1 {
-		return c.JSON(http.StatusInternalServerError, &model.GenericError{Message: "couldn't update users"})
+		status = http.StatusInternalServerError
+		msg += "[" + k + "] UpdateUser error: update query error, HTTP: " + strconv.Itoa(status)
+		err = errors.New("update query error")
+		return err
 	}
 
-	return c.JSON(http.StatusOK, user)
+	status = http.StatusOK
+	msg += "[" + k + "] UpdateUser completed: user updated, HTTP: " + strconv.Itoa(status)
+	return c.JSON(status, user)
 }
 
 // swagger:route DELETE /api/v1/user/{id} users_v1 deleteUserV1
@@ -81,19 +128,37 @@ func UpdateUser(c echo.Context) error {
 //		404: errorResponse
 func DeleteUser(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
+	var status int
+	k, msg := "", "userapi_v1.users"
+
+	defer func() {
+		producer.ProduceMessage(k, msg)
+		if err != nil {
+			c.JSON(status, &model.GenericError{Message: msg})
+		}
+	}()
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &model.GenericError{Message: `"error":"incorrect id"`})
+		k = "unknown"
+		status = http.StatusBadRequest
+		msg += "[" + k + "] DeleteUser error: incorrect id, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
+	k = strconv.Itoa(id)
 	db := storage.GetDBInstance()
 	result := db.Delete(&model.User{}, id)
 
 	if result.RowsAffected < 1 {
-		return c.JSON(http.StatusNotFound, &model.GenericError{Message: "couldn't get user"})
+		status = http.StatusNotFound
+		msg += "[" + k + "] DeleteUser error: user doesn't exist, HTTP: " + strconv.Itoa(status)
+		err = errors.New("user doesn't exist")
+		return err
 	}
 
-	return c.JSON(http.StatusOK, &model.GenericMessage{Message: "user deleted"})
+	status = http.StatusOK
+	msg += "[" + k + "] DeleteUser completed: user deleted, HTTP: " + strconv.Itoa(status)
+	return c.JSON(status, &model.GenericMessage{Message: msg})
 }
 
 // swagger:route GET /api/v1/user/{id} users_v1 getUserV1
@@ -107,20 +172,38 @@ func DeleteUser(c echo.Context) error {
 //		404: errorResponse
 func GetUserById(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
+	var status int
+	k, msg := "", "userapi_v1.users"
+
+	defer func() {
+		producer.ProduceMessage(k, msg)
+		if err != nil {
+			c.JSON(status, &model.GenericError{Message: msg})
+		}
+	}()
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, &model.GenericError{Message: `"error":"incorrect id"`})
+		k = "unknown"
+		status = http.StatusBadRequest
+		msg += "[" + k + "] GetUserById error: incorrect id, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
+	k = strconv.Itoa(id)
 	db := storage.GetDBInstance()
 	user := model.User{}
 	result := db.Find(&user, id)
 
 	if result.RowsAffected < 1 {
-		return c.JSON(http.StatusNotFound, &model.GenericError{Message: "couldn't get user"})
+		status = http.StatusNotFound
+		msg += "[" + k + "] GetUserById error: couldn't get user, HTTP: " + strconv.Itoa(status)
+		err = errors.New("couldn't get user")
+		return err
 	}
 
-	return c.JSON(http.StatusOK, user)
+	status = http.StatusOK
+	msg += "[" + k + "] GetUserById completed: user read, HTTP: " + strconv.Itoa(status)
+	return c.JSON(status, user)
 }
 
 // swagger:route GET /api/v1/users users_v1 listUsersV1
@@ -136,9 +219,20 @@ func GetUsers(c echo.Context) error {
 	db := storage.GetDBInstance()
 	users := []model.User{}
 
+	k, msg := "all", "userapi_v1.users"
+	var status int
+
+	defer func() {
+		producer.ProduceMessage(k, msg)
+	}()
+
 	if err := db.Find(&users).Error; err != nil {
-		return c.JSON(http.StatusInternalServerError, &model.GenericError{Message: "couldn't get users"})
+		status = http.StatusNotFound
+		msg += "[" + k + "] GetUsers error: couldn't get users, HTTP: " + strconv.Itoa(status)
+		return err
 	}
 
-	return c.JSON(http.StatusOK, users)
+	status = http.StatusOK
+	msg += "[" + k + "] GetUsers completed: users read, HTTP: " + strconv.Itoa(status)
+	return c.JSON(status, users)
 }
