@@ -41,19 +41,37 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 func Validate(auth string, c echo.Context) (interface{}, error) {
-	// Issue #647, #656
-	keyFunc := func(t *jwt.Token) (interface{}, error) {
+
+	localKeyFunc := func(t *jwt.Token) (interface{}, error) {
 		if t.Method.Alg() != "HS256" {
 			return nil, fmt.Errorf("unexpected jwt signing method=%v", t.Header["alg"])
 		}
 		// signingKey := getSigningKey(t.)
+		fmt.Println("LOCAL KEY FUNC")
 		return []byte(Secretkey), nil
 	}
-	// claims are of type `jwt.MapClaims` when token is created with `jwt.Parse`
-	token, err := jwt.Parse(auth, keyFunc)
-	fmt.Println("Token ", token)
-	fmt.Println("Auth ", auth)
 
+	remoteKeyFunc := func(t *jwt.Token) (interface{}, error) {
+		if t.Method.Alg() != "HS256" {
+			return nil, fmt.Errorf("unexpected jwt signing method=%v", t.Header["alg"])
+		}
+		// signingKey := getSigningKey(t.)
+		fmt.Println("REMOTE KEY FUNC")
+		key, _ := getSigningKey(t.Raw)
+		fmt.Println("SIGNING KEY ", key)
+		return []byte(key), nil
+	}
+
+	// claims are of type `jwt.MapClaims` when token is created with `jwt.Parse`
+	token, err := jwt.Parse(auth, localKeyFunc)
+
+	// try parsing with remote key
+	if err != nil {
+		token, err = jwt.Parse(auth, remoteKeyFunc)
+	}
+
+	fmt.Println("Auth ", auth)
+	fmt.Println("Token ", token)
 	// zwrócony token i nil == poprawny token
 	if err != nil {
 		fmt.Println("tu błond", err.Error())
@@ -82,6 +100,7 @@ func GenerateJWT(username, role string) (string, error) {
 		fmt.Errorf("Something Went Wrong: %s", err.Error())
 		return "", err
 	}
+	// SetToken(tokenString, Secretkey, expireTime)
 	SetToken(tokenString, Secretkey, expireTime)
 	return tokenString, nil
 }

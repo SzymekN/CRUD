@@ -11,10 +11,10 @@ import (
 func main() {
 
 	e := controller.SetupRouter()
+	auth.SetupRedisConnection()
 	storage.CreateCassandraSession()
 	storage.NewDB()
 	producer.Setup()
-	auth.SetupRedisConnection()
 	// seeder.CreateAndSeed(storage.GetDBInstance(), true)
 
 	go grpc.CreateGRPCServer()

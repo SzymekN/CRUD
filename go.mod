@@ -3,7 +3,7 @@ module github.com/SzymekN/CRUD
 go 1.18
 
 require (
-	github.com/go-redis/redis/v9 v9.0.0-beta.2
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gocql/gocql v1.2.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jinzhu/gorm v1.9.16
@@ -11,7 +11,7 @@ require (
 	github.com/mvrilo/go-redoc v0.1.2
 	github.com/segmentio/kafka-go v0.4.34
 	github.com/stretchr/testify v1.8.0
-	golang.org/x/crypto v0.0.0-20220817201139-bc19a97f63c8
+	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
 	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.28.1
 )
@@ -40,6 +40,7 @@ require (
 	github.com/go-swagger/go-swagger v0.29.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/hailocab/go-hostpool v0.0.0-20160125115350-e80d13ce29ed // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -58,6 +59,7 @@ require (
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
+	github.com/onsi/gomega v1.20.0 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -75,7 +77,7 @@ require (
 	go.mongodb.org/mongo-driver v1.8.2 // indirect
 	golang.org/x/mod v0.5.1 // indirect
 	golang.org/x/net v0.0.0-20220826154423-83b083e8dc8b // indirect
-	golang.org/x/sys v0.0.0-20220817070843-5a390386f1f2 // indirect
+	golang.org/x/sys v0.0.0-20220829200755-d48e67d00261 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 	golang.org/x/tools v0.1.8 // indirect
