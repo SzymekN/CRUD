@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -39,22 +40,49 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
+func Validate(auth string, c echo.Context) (interface{}, error) {
+	// Issue #647, #656
+	keyFunc := func(t *jwt.Token) (interface{}, error) {
+		if t.Method.Alg() != "HS256" {
+			return nil, fmt.Errorf("unexpected jwt signing method=%v", t.Header["alg"])
+		}
+		// signingKey := getSigningKey(t.)
+		return []byte(Secretkey), nil
+	}
+	// claims are of type `jwt.MapClaims` when token is created with `jwt.Parse`
+	token, err := jwt.Parse(auth, keyFunc)
+	fmt.Println("Token ", token)
+	fmt.Println("Auth ", auth)
+
+	// zwrócony token i nil == poprawny token
+	if err != nil {
+		fmt.Println("tu błond", err.Error())
+		return nil, err
+	}
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+	return token, nil
+}
+
 func GenerateJWT(username, role string) (string, error) {
 	var mySigningKey = []byte(Secretkey)
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
+	expireTime := time.Minute * 2
 
 	claims["authorized"] = true
 	claims["username"] = username
 	claims["role"] = role
-	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
+	claims["exp"] = time.Now().Add(expireTime).Unix()
 
 	tokenString, err := token.SignedString(mySigningKey)
-
+	fmt.Println("Signed TOKEN", tokenString)
 	if err != nil {
 		fmt.Errorf("Something Went Wrong: %s", err.Error())
 		return "", err
 	}
+	SetToken(tokenString, Secretkey, expireTime)
 	return tokenString, nil
 }
 

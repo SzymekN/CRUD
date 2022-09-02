@@ -20,7 +20,13 @@ func SetupRouter() *echo.Echo {
 	e.GET("/api/v2/operators/signin", SignIn)
 
 	jwt_auth := e.Group("")
-	jwt_auth.Use(middleware.JWT([]byte(auth.Secretkey)))
+	config := middleware.JWTConfig{
+		SigningKey:     []byte(auth.Secretkey),
+		ParseTokenFunc: auth.Validate,
+	}
+	// jwt_auth.Use(middleware.JWT([]byte(auth.Secretkey)))
+	jwt_auth.Use(middleware.JWTWithConfig(config))
+	// middleware.JWTConfig.ParseTokenFunc = auth.Validate
 
 	jwt_auth.GET("/api/v1/users/:id", GetUserById)
 	jwt_auth.GET("/api/v1/users", GetUsers)
