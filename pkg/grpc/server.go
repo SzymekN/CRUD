@@ -3,9 +3,9 @@ package grpc
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
 	"net"
+	"os"
 	"strconv"
 
 	"github.com/SzymekN/CRUD/pkg/controller"
@@ -22,7 +22,7 @@ type server struct {
 }
 
 var (
-	port = flag.Int("port", 8201, "The server port")
+	port = flag.String("port", os.Getenv("GRPC_PORT"), "The server port")
 )
 
 func (s *server) DeleteUser(c context.Context, in *UserRequest) (*UserReply, error) {
@@ -127,7 +127,7 @@ func (s *server) GetUser(c context.Context, in *UserRequest) (*UserReply, error)
 func CreateGRPCServer() {
 
 	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	lis, err := net.Listen("tcp", ":"+*port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}

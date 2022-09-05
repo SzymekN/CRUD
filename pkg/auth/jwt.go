@@ -3,14 +3,16 @@ package auth
 import (
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
+	"github.com/SzymekN/CRUD/pkg/producer"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var Secretkey string = "tokluczjestjakis"
+var Secretkey string = os.Getenv("JWT_KEY")
 
 type Operator struct {
 	Username string `json:"username" form:"username"`
@@ -46,8 +48,6 @@ func Validate(auth string, c echo.Context) (interface{}, error) {
 		if t.Method.Alg() != "HS256" {
 			return nil, fmt.Errorf("unexpected jwt signing method=%v", t.Header["alg"])
 		}
-		// signingKey := getSigningKey(t.)
-		fmt.Println("LOCAL KEY FUNC")
 		return []byte(Secretkey), nil
 	}
 
@@ -55,10 +55,7 @@ func Validate(auth string, c echo.Context) (interface{}, error) {
 		if t.Method.Alg() != "HS256" {
 			return nil, fmt.Errorf("unexpected jwt signing method=%v", t.Header["alg"])
 		}
-		// signingKey := getSigningKey(t.)
-		fmt.Println("REMOTE KEY FUNC")
 		key, _ := getSigningKey(t.Raw)
-		fmt.Println("SIGNING KEY ", key)
 		return []byte(key), nil
 	}
 
@@ -70,16 +67,17 @@ func Validate(auth string, c echo.Context) (interface{}, error) {
 		token, err = jwt.Parse(auth, remoteKeyFunc)
 	}
 
-	fmt.Println("Auth ", auth)
-	fmt.Println("Token ", token)
 	// zwrócony token i nil == poprawny token
 	if err != nil {
-		fmt.Println("tu błond", err.Error())
+		producer.ProduceMessage("JWT validation", "JWT validation failed: "+err.Error())
 		return nil, err
 	}
 	if !token.Valid {
+		producer.ProduceMessage("JWT validation", "JWT validation failed: "+err.Error())
 		return nil, errors.New("invalid token")
 	}
+
+	producer.ProduceMessage("JWT validation", "JWT validation succesfull")
 	return token, nil
 }
 
@@ -95,7 +93,6 @@ func GenerateJWT(username, role string) (string, error) {
 	claims["exp"] = time.Now().Add(expireTime).Unix()
 
 	tokenString, err := token.SignedString(mySigningKey)
-	fmt.Println("Signed TOKEN", tokenString)
 	if err != nil {
 		fmt.Errorf("Something Went Wrong: %s", err.Error())
 		return "", err

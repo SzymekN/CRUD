@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/SzymekN/CRUD/pkg/producer"
 	"github.com/go-redis/redis/v8"
 )
 
@@ -31,10 +32,6 @@ func SetupRedisConnection() *redis.Client {
 
 	fmt.Println(pong, err)
 
-	err = RDB.Set(ctx, "key", "value", 0).Err()
-	if err != nil {
-		panic(err)
-	}
 	return RDB
 }
 
@@ -45,30 +42,27 @@ func getSigningKey(token string) (string, error) {
 	fmt.Println(pong, err)
 	c := context.Background()
 	res, err := rdb.Get(c, token).Result()
+
 	if err != nil {
+		producer.ProduceMessage("REDIS read", "ERROR reading token:"+err.Error())
 		fmt.Println("ERROR reading token:", err.Error())
 		return "", err
 
 	}
 
-	fmt.Println("res ", res)
-	// fmt.Println("ERRORROORORORORO ", err.Error())
 	return res, nil
 }
 
 func SetToken(token, key string, expireTime time.Duration) error {
 	rdb := GetRDB()
-	fmt.Println("TUTAJ", rdb.Options().Addr)
-	fmt.Println("TUTAJ", RDB.Options().Addr)
 
 	pong, err := rdb.Ping(ctx).Result()
 	fmt.Println(pong, err)
 	err = rdb.Set(ctx, token, key, 0).Err()
 	if err != nil {
+		producer.ProduceMessage("REDIS write", "ERROR writing token:"+err.Error())
 		panic(err)
 	}
-
-	err = rdb.Set(ctx, "asd", "asd", 0).Err()
 
 	return nil
 }

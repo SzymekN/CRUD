@@ -46,7 +46,7 @@ services:
     container_name: redis-server
     command: ["redis-server"]
     
-  userapi:
+  userapi-1:
     depends_on:
       cassandra:
         condition: service_healthy
@@ -56,15 +56,41 @@ services:
         condition: service_started
 
     build: /vagrant_data
-    container_name: userapi
+    container_name: userapi-1
     restart: always
     ports:
       - '8200:8200'
-      - '8201:8201'
+      - '8300:8300'
     environment:
+      - API_PORT=8200
+      - GRPC_PORT=8300
       - PG_HOST=postgres
       - CASSANDRA_HOST=cassandra
       - REDIS_HOST=redis-server
+      - JWT_KEY=userapi-1
+
+  userapi-2:
+    depends_on:
+      cassandra:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis-server:
+        condition: service_started
+
+    build: /vagrant_data
+    container_name: userapi-2
+    restart: always
+    ports:
+      - '8201:8201'
+      - '8301:8301'
+    environment:
+      - API_PORT=8201
+      - GRPC_PORT=8301
+      - PG_HOST=postgres
+      - CASSANDRA_HOST=cassandra
+      - REDIS_HOST=redis-server
+      - JWT_KEY=userapi-2
 
   zookeeper:
       image: docker.io/bitnami/zookeeper:3.8

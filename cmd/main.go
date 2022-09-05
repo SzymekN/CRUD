@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/SzymekN/CRUD/pkg/auth"
 	"github.com/SzymekN/CRUD/pkg/controller"
 	"github.com/SzymekN/CRUD/pkg/grpc"
@@ -18,6 +20,6 @@ func main() {
 	// seeder.CreateAndSeed(storage.GetDBInstance(), true)
 
 	go grpc.CreateGRPCServer()
-	e.Logger.Fatal(e.Start(":8200"))
+	e.Logger.Fatal(e.Start(":" + os.Getenv("API_PORT")))
 
 }
