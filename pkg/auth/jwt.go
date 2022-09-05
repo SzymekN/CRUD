@@ -3,7 +3,6 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/SzymekN/CRUD/pkg/producer"
@@ -12,7 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var Secretkey string = os.Getenv("JWT_KEY")
+var Secretkey string = ""
 
 type Operator struct {
 	Username string `json:"username" form:"username"`
@@ -44,27 +43,23 @@ func CheckPasswordHash(password, hash string) bool {
 
 func Validate(auth string, c echo.Context) (interface{}, error) {
 
-	localKeyFunc := func(t *jwt.Token) (interface{}, error) {
-		if t.Method.Alg() != "HS256" {
-			return nil, fmt.Errorf("unexpected jwt signing method=%v", t.Header["alg"])
-		}
-		return []byte(Secretkey), nil
-	}
-
 	remoteKeyFunc := func(t *jwt.Token) (interface{}, error) {
 		if t.Method.Alg() != "HS256" {
 			return nil, fmt.Errorf("unexpected jwt signing method=%v", t.Header["alg"])
 		}
-		key, _ := getSigningKey(t.Raw)
-		return []byte(key), nil
+
+		Secretkey = getKey()
+		return []byte(Secretkey), nil
 	}
 
 	// claims are of type `jwt.MapClaims` when token is created with `jwt.Parse`
-	token, err := jwt.Parse(auth, localKeyFunc)
+	token, err := jwt.Parse(auth, remoteKeyFunc)
 
-	// try parsing with remote key
-	if err != nil {
-		token, err = jwt.Parse(auth, remoteKeyFunc)
+	tokenRevoked, _ := GetToken(token.Raw)
+
+	if tokenRevoked {
+		fmt.Println("REVOKED")
+		return nil, errors.New("Token Revoked")
 	}
 
 	// zwrócony token i nil == poprawny token
@@ -73,7 +68,7 @@ func Validate(auth string, c echo.Context) (interface{}, error) {
 		return nil, err
 	}
 	if !token.Valid {
-		producer.ProduceMessage("JWT validation", "JWT validation failed: "+err.Error())
+		producer.ProduceMessage("JWT validation", "JWT validation failed: invalid token")
 		return nil, errors.New("invalid token")
 	}
 
@@ -81,8 +76,23 @@ func Validate(auth string, c echo.Context) (interface{}, error) {
 	return token, nil
 }
 
+func getKey() string {
+	var err error
+	if Secretkey == "" {
+		Secretkey, err = getSigningKey()
+	}
+	if err != nil {
+		Secretkey, err = setSigningKey()
+	}
+
+	if err != nil {
+		panic("No jwt Key found")
+	}
+	return Secretkey
+}
+
 func GenerateJWT(username, role string) (string, error) {
-	var mySigningKey = []byte(Secretkey)
+	var mySigningKey = []byte(getKey())
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	expireTime := time.Minute * 2
@@ -98,7 +108,7 @@ func GenerateJWT(username, role string) (string, error) {
 		return "", err
 	}
 	// SetToken(tokenString, Secretkey, expireTime)
-	SetToken(tokenString, Secretkey, expireTime)
+	// SetToken(tokenString, Secretkey, expireTime)
 	return tokenString, nil
 }
 

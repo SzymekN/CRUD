@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/SzymekN/CRUD/pkg/auth"
 	"github.com/SzymekN/CRUD/pkg/model"
 	"github.com/SzymekN/CRUD/pkg/producer"
 	"github.com/SzymekN/CRUD/pkg/storage"
 	"github.com/gocql/gocql"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
@@ -84,6 +86,47 @@ func SignUp(c echo.Context) error {
 	msg += "[" + k + "] SignUp completed: user signed up, HTTP: " + strconv.Itoa(status)
 	return c.JSON(http.StatusOK, op)
 
+}
+
+func SignOut(c echo.Context) error {
+	var err error
+	var status int = 200
+	k, msg := "SignOut", "userapi.operators "
+
+	defer func() {
+		producer.ProduceMessage(k, msg)
+		c.JSON(status, &model.GenericMessage{Message: msg})
+	}()
+
+	user := c.Get("user").(*jwt.Token)
+	token := user.Raw
+	claims := user.Claims.(jwt.MapClaims)
+	exp := claims["exp"]
+	var duration float64
+
+	if expFloat, ok := exp.(float64); ok && token != "" {
+		duration = expFloat - float64(time.Now().Unix())
+	} else {
+		status = http.StatusBadRequest
+		msg += "SignOut error: couldn't retrieve token, HTTP: " + strconv.Itoa(status)
+		return nil
+	}
+
+	if duration < 1 {
+		msg += "SignOut error: duration lesser tha 0, HTTP: " + strconv.Itoa(status)
+		return nil
+	}
+
+	err = auth.SetToken(token, time.Duration(duration))
+	if err != nil {
+		status = http.StatusInternalServerError
+		msg += "SignOut error: couldn't write to DB, HTTP: " + strconv.Itoa(status)
+		return err
+	}
+
+	fmt.Println("SIGNED  OUT")
+	msg += "SignOut completed, HTTP: " + strconv.Itoa(status)
+	return nil
 }
 
 func SignIn(c echo.Context) error {

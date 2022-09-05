@@ -35,17 +35,16 @@ func SetupRedisConnection() *redis.Client {
 	return RDB
 }
 
-func getSigningKey(token string) (string, error) {
+func getSigningKey() (string, error) {
 	rdb := GetRDB()
 
 	pong, err := rdb.Ping(ctx).Result()
 	fmt.Println(pong, err)
-	c := context.Background()
-	res, err := rdb.Get(c, token).Result()
+	res, err := rdb.Get(ctx, "key").Result()
 
 	if err != nil {
-		producer.ProduceMessage("REDIS read", "ERROR reading token:"+err.Error())
-		fmt.Println("ERROR reading token:", err.Error())
+		producer.ProduceMessage("REDIS read", "ERROR reading key:"+err.Error())
+		fmt.Println("ERROR reading key:", err.Error())
 		return "", err
 
 	}
@@ -53,16 +52,50 @@ func getSigningKey(token string) (string, error) {
 	return res, nil
 }
 
-func SetToken(token, key string, expireTime time.Duration) error {
+func setSigningKey() (string, error) {
 	rdb := GetRDB()
 
 	pong, err := rdb.Ping(ctx).Result()
 	fmt.Println(pong, err)
-	err = rdb.Set(ctx, token, key, 0).Err()
+	key := "asd"
+	err = rdb.Set(ctx, "key", key, 60).Err()
+
 	if err != nil {
 		producer.ProduceMessage("REDIS write", "ERROR writing token:"+err.Error())
-		panic(err)
+		fmt.Println("ERROR writing token:", err.Error())
+		return "", err
+
 	}
 
+	return key, nil
+}
+
+func SetToken(token string, expireTime time.Duration) error {
+	rdb := GetRDB()
+
+	pong, err := rdb.Ping(ctx).Result()
+	fmt.Println(pong, err)
+	err = rdb.Set(ctx, token, "0", expireTime*time.Second).Err()
+	if err != nil {
+		producer.ProduceMessage("REDIS write", "ERROR writing token:"+err.Error())
+		return err
+	}
+
+	producer.ProduceMessage("REDIS write", "Token:"+token+" set")
 	return nil
+}
+
+func GetToken(token string) (bool, error) {
+	rdb := GetRDB()
+
+	pong, err := rdb.Ping(ctx).Result()
+	fmt.Println(pong, err)
+	_, err = rdb.Get(ctx, token).Result()
+	if err != nil {
+		producer.ProduceMessage("REDIS read", "ERROR reading token:"+token+", err: "+err.Error())
+		return false, err
+	}
+
+	producer.ProduceMessage("REDIS write", "Token: "+token+" get")
+	return true, nil
 }

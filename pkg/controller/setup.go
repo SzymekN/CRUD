@@ -24,9 +24,10 @@ func SetupRouter() *echo.Echo {
 		SigningKey:     []byte(auth.Secretkey),
 		ParseTokenFunc: auth.Validate,
 	}
-	// jwt_auth.Use(middleware.JWT([]byte(auth.Secretkey)))
+
 	jwt_auth.Use(middleware.JWTWithConfig(config))
-	// middleware.JWTConfig.ParseTokenFunc = auth.Validate
+
+	jwt_auth.GET("/api/v2/operators/signout", SignOut)
 
 	jwt_auth.GET("/api/v1/users/:id", GetUserById)
 	jwt_auth.GET("/api/v1/users", GetUsers)
