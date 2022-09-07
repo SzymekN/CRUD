@@ -58,7 +58,7 @@ func Validate(auth string, c echo.Context) (interface{}, error) {
 	tokenRevoked, _ := GetToken(token.Raw)
 
 	if tokenRevoked {
-		fmt.Println("REVOKED")
+		producer.ProduceMessage("JWT validation", token.Raw+" REVOKED")
 		return nil, errors.New("Token Revoked")
 	}
 

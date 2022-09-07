@@ -58,15 +58,16 @@ func setSigningKey() (string, error) {
 	pong, err := rdb.Ping(ctx).Result()
 	fmt.Println(pong, err)
 	key := "asd"
-	err = rdb.Set(ctx, "key", key, 60).Err()
+	err = rdb.Set(ctx, "key", key, 0).Err()
 
 	if err != nil {
-		producer.ProduceMessage("REDIS write", "ERROR writing token:"+err.Error())
-		fmt.Println("ERROR writing token:", err.Error())
+		producer.ProduceMessage("REDIS write", "ERROR writing key:"+err.Error())
+		fmt.Println("ERROR writing key:", err.Error())
 		return "", err
 
 	}
 
+	producer.ProduceMessage("REDIS write", "Key set:"+key)
 	return key, nil
 }
 

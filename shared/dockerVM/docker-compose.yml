@@ -120,6 +120,8 @@ services:
         - KAFKA_NUM_PARTITIONS=3
       depends_on:
         - zookeeper
+      # command: ["kafka-topics.sh --create --bootstrap-server kafka-1:9092 --replication-factor 1 --partitions 1 --topic messages"]
+
   kafka-2:
       image: docker.io/bitnami/kafka:3.2
       container_name: kafka-2
@@ -159,6 +161,7 @@ services:
       - kafka-3
     build: /consumer_data
     container_name: consumer
+    restart: always
 
         # (cd /opt/bitnami/kafka/bin/windows/; ./kafka-topics.sh --create --bootstrap-server kafka-kafka-1:9092 --replication-factor 1 --partitions 1 --topic messages)
         # kafka-topics.sh --create --bootstrap-server kafka-1:9092 --replication-factor 1 --partitions 1 --topic messages
