@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 
-	"github.com/SzymekN/CRUD/pkg/auth"
 	"github.com/SzymekN/CRUD/pkg/controller"
 	"github.com/SzymekN/CRUD/pkg/grpc"
 	"github.com/SzymekN/CRUD/pkg/producer"
@@ -13,9 +12,9 @@ import (
 func main() {
 
 	e := controller.SetupRouter()
-	auth.SetupRedisConnection()
-	storage.CreateCassandraSession()
-	storage.NewDB()
+	storage.SetupRedisConnection()
+	storage.SetupCassandraConnection()
+	storage.SetupPostgresConnection()
 	producer.Setup()
 	// seeder.CreateAndSeed(storage.GetDBInstance(), true)
 

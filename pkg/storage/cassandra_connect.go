@@ -9,7 +9,7 @@ import (
 
 var CASSANDRA *gocql.Session
 
-func CreateCassandraSession() *gocql.Session {
+func SetupCassandraConnection() *gocql.Session {
 
 	var err error
 

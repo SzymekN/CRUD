@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3'
 
 networks:
   default: 
@@ -120,6 +120,7 @@ services:
         - KAFKA_NUM_PARTITIONS=3
       depends_on:
         - zookeeper
+      restart: always
       # command: ["kafka-topics.sh --create --bootstrap-server kafka-1:9092 --replication-factor 1 --partitions 1 --topic messages"]
 
   kafka-2:
@@ -138,6 +139,7 @@ services:
         - KAFKA_NUM_PARTITIONS=3
       depends_on:
         - zookeeper
+      restart: always
   kafka-3:
       image: docker.io/bitnami/kafka:3.2
       container_name: kafka-3
@@ -154,6 +156,7 @@ services:
         - KAFKA_NUM_PARTITIONS=3
       depends_on:
         - zookeeper
+      restart: always
   consumer:
     depends_on:
       - kafka-1

@@ -11,7 +11,7 @@
 //    - application/json
 //
 // swagger:meta
-package controller
+package docs
 
 import "github.com/SzymekN/CRUD/pkg/model"
 
