@@ -26,6 +26,30 @@ type User struct {
 	Age int `json:"age" form:"age" query:"age"`
 }
 
+// swagger:model Operator
+type Operator struct {
+	// Username of the Operator
+	// in: string
+	// required: true
+	Username string `json:"username" form:"username" query:"username" gorm:"primaryKey;autoIncrement;not null;<-:create"`
+	// Email of the Operator
+	// in: string
+	// required: true
+	// minimum length: 3
+	// maximum length: 30
+	Email string `json:"email" form:"email" query:"email" gorm:"size:50"`
+	// Password of the Operator
+	// in: string
+	// required: true
+	// minimum length: 3
+	// maximum length: 30
+	Password string `json:"password" form:"password" query:"password" gorm:"size:50"`
+	// Role of the Operator
+	// in: string
+	// required: true
+	Role string `json:"role" form:"role" query:"role"`
+}
+
 // swagger:model GenericError
 type GenericError struct {
 	// Response message

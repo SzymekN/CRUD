@@ -9,4 +9,8 @@ var (
 		{Firstname: "Chuck", Lastname: "Norris", Age: 18},
 		{Firstname: "Andrzej", Lastname: "Duda", Age: 41},
 	}
+	Operators = []*model.Operator{
+		{Username: "admin1", Email: "admin1@admin", Password: "admin", Role: "admin"},
+		{Username: "user1", Email: "user1@user", Password: "user", Role: "user"},
+	}
 )

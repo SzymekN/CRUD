@@ -12,7 +12,7 @@ import (
 
 const (
 	topic         = "messages"
-	brokerAddress = "kafka-1:9092"
+	brokerAddress = "kafka:9092"
 )
 
 var (

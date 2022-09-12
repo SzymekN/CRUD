@@ -15,13 +15,17 @@ func SetupCassandraConnection() *gocql.Session {
 
 	cassIP := os.Getenv("CASSANDRA_HOST")
 
-	if cassIP == "" {
-		cassIP = "192.168.33.50"
-	}
+	// if cassIP == "" {
+	// 	cassIP = "192.168.33.50"
+	// }
 
 	cluster := gocql.NewCluster(cassIP)
-	cluster.Keyspace = "userapi"
+	// cluster.Keyspace = "userapi"
 	cluster.Consistency = gocql.Quorum
+	cluster.Authenticator = gocql.PasswordAuthenticator{
+		Username: os.Getenv("CASSANDRA_USER"),
+		Password: os.Getenv("CASSANDRA_PASSWORD"),
+	}
 	CASSANDRA, err = cluster.CreateSession()
 
 	if err != nil {

@@ -1,0 +1,29 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: cassandra-pv-volume
+  labels:
+    type: local
+    app: cassandra
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /cassandra/data
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: cassandra-pv-claim
+  labels:
+    app: cassandra
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi

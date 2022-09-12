@@ -17,13 +17,9 @@ func GetRDB() *redis.Client {
 func SetupRedisConnection() *redis.Client {
 	RDB = redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_HOST") + ":6379",
-		Password: "",
+		Password: os.Getenv("REDIS_PASSWORD"),
 		DB:       0,
 	})
-	fmt.Println(os.Getenv("REDIS_HOST"))
-	fmt.Println(os.Getenv("REDIS_HOST") + ":6379")
-	fmt.Println(RDB.Options().Addr)
-	fmt.Println(RDB)
 
 	pong, err := RDB.Ping(context.Background()).Result()
 

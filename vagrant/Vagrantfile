@@ -173,10 +173,18 @@ Vagrant.configure("2") do |config|
       echo "<--- DOCKER INSTALL --->"
       curl -fsSL https://get.docker.com -o get-docker.sh
       DRY_RUN=1 sudo sh ./get-docker.sh
-
+      sudo usermod -aG docker vagrant && newgrp docker
+      sudo docker network create redisnet
+      
       echo "<--- CREATE DIRECTORIES --->"
       sudo mkdir -p /cassandra/data
       sudo mkdir -p /postgres/data
+      sudo mkdir -p /zookeeper
+      sudo mkdir -p /kafka/broker-1
+      sudo mkdir -p /kafka/broker-2
+      sudo mkdir -p /kafka/broker-3
+      sudo chmod 777 -R /zookeeper/
+      sudo chmod 777 -R /kafka/
       
       echo "<--- IMPORT SAMPLE DATABASE TO CASSANDRA --->"
       sudo docker network create cassandra
@@ -200,4 +208,100 @@ Vagrant.configure("2") do |config|
       SHELL
     
   end
+ 
+  config.vm.define "minikube" do |minikube|
+
+    
+    minikube.vm.provider "virtualbox" do |vb|
+      # Display the VirtualBox GUI when booting the machine
+      # vb.gui = true
+      
+      # Customize the amount of memory on the VM:
+      vb.memory = "8096"
+      vb.cpus = 4
+    end
+    
+    minikube.vm.hostname = "minikube"
+    minikube.vm.box = "ubuntu/focal64"
+    # minikube.vm.box = "ilionx/ubuntu2004-minikube"
+
+    minikube.vm.synced_folder "../", "/vagrant_data"
+    minikube.vm.synced_folder "../../consumer", "/consumer_data"
+    minikube.vm.network "private_network", ip: "192.168.33.60"
+    # minikube.vm.network "forwarded_port", guest: 7080, host: 8222
+
+    
+    minikube.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+
+      sudo mkdir -p /bitnami/cassandra
+      sudo mkdir -p /bitnami/redis
+      sudo mkdir -p /postgres/data
+      sudo chmod 777 -R /kafka/
+      sudo chmod 777 -R /bitnami/
+
+      echo "<--- DOCKER INSTALL --->"
+      curl -fsSL https://get.docker.com -o get-docker.sh
+      DRY_RUN=1 sudo sh ./get-docker.sh
+      sudo usermod -aG docker vagrant && newgrp docker
+
+      curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+      sudo install minikube-linux-amd64 /usr/local/bin/minikube
+      minikube docker-env
+      eval $(minikube -p minikube docker-env)
+      # sudo sysctl fs.protected_regular=0
+
+      curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+      chmod 700 get_helm.sh
+      ./get_helm.sh
+
+      helm repo add bitnami https://charts.bitnami.com/bitnami
+      helm install -f /vagrant_data/shared/kubernetes/cass-values.yaml cassandra bitnami/cassandra --version 9.4.2
+      helm install -f /vagrant_data/shared/kubernetes/redis-values.yaml redis bitnami/redis
+      helm install kafka -f /vagrant_data/shared/kubernetes/kafka-values.yaml bitnami/kafka
+      minikube kubectl -- create -f  /vagrant_data/shared/kubernetes/postgres.yaml
+      minikube kubectl -- create -f  /vagrant_data/shared/kubernetes/userapi.yaml
+      minikube kubectl -- create -f  /vagrant_data/shared/kubernetes/consumer.yaml
+      SHELL
+
+      minikube.vm.provision "shell", run: "always", inline: <<-SHELL
+      minikube start --memory 6144 --cpus 2
+      alias kubectl="minikube kubectl --"
+      eval $(minikube -p minikube docker-env)
+      docker build --tag userapi:latest /vagrant_data
+      docker build --tag consumer:latest /consumer_data
+
+      # minikube kubectl -- port-forward service/userapi 8200:8200 8201:8201 --address 0.0.0.0
+      # minikube start
+      SHELL
+  end
+
+
+  config.vm.define "minikube2" do |minikube|
+
+    
+    minikube.vm.provider "virtualbox" do |vb|
+      # Display the VirtualBox GUI when booting the machine
+      # vb.gui = true
+      
+      # Customize the amount of memory on the VM:
+      vb.memory = "4096"
+      vb.cpus = 2
+    end
+    
+    minikube.vm.hostname = "minikube"
+    # minikube.vm.box = "ubuntu/focal64"
+    minikube.vm.box = "ilionx/ubuntu2004-minikube"
+
+    minikube.vm.synced_folder "../", "/vagrant_data"
+    minikube.vm.synced_folder "../../consumer", "/consumer_data"
+    minikube.vm.network "private_network", ip: "192.168.33.70"
+    minikube.vm.network "forwarded_port", guest: 7080, host: 8111
+
+    # minikube.vm.provision "shell", run: "always", inline: <<-SHELL
+    #   alias kubectl="minikube kubectl --"
+    #   minikube start
+    #   SHELL
+  end
+
 end

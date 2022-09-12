@@ -1,0 +1,35 @@
+dbUser:
+  user: "userapi"
+  password: "userapi"
+cluster:
+  name: "userapi"
+jvm:
+  maxHeapSize: 1G
+  newHeapSize: 800M
+
+  
+resources:
+  # Example:
+  limits:
+     cpu: 2
+     memory: 4Gi
+  ##
+  # limits: {}
+  ## Examples:
+  requests:
+     cpu: 2
+     memory: 500M
+  ##
+# # The postgres helm chart deployment will be using PVC postgresql-data-claim
+
+# persistence:
+#   enabled: true
+#   # size: 2Gi
+# livenessProbe:
+#   enable: false
+# redinessProbe:
+#   enable: false
+
+# clusterName: "userapi"
+# persistance:
+  # enabled: true

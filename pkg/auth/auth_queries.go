@@ -70,8 +70,10 @@ func SetToken(token string, expireTime time.Duration) error {
 }
 
 func GetToken(token string) (bool, error) {
+
 	rdb := storage.GetRDB()
 
+	fmt.Println(rdb)
 	_, err := rdb.Get(ctx, token).Result()
 	if err != nil {
 		producer.ProduceMessage("REDIS read", "ERROR reading token:"+token+", err: "+err.Error())

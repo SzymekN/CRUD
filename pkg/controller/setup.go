@@ -16,8 +16,8 @@ func SetupRouter() *echo.Echo {
 		return c.String(http.StatusOK, `{"message":"Hello World!"}`)
 	})
 
-	e.POST("/api/v2/operators/signup", SignUp)
-	e.GET("/api/v2/operators/signin", SignIn)
+	e.POST("/api/v3/operators/signup", SignUp)
+	e.GET("/api/v3/operators/signin", SignIn)
 
 	jwt_auth := e.Group("")
 	config := middleware.JWTConfig{
@@ -27,7 +27,7 @@ func SetupRouter() *echo.Echo {
 
 	jwt_auth.Use(middleware.JWTWithConfig(config))
 
-	jwt_auth.GET("/api/v2/operators/signout", SignOut)
+	jwt_auth.GET("/api/v3/operators/signout", SignOut)
 
 	jwt_auth.GET("/api/v1/users/:id", GetUserById)
 	jwt_auth.GET("/api/v1/users", GetUsers)

@@ -1,0 +1,17 @@
+global:
+  redis: 
+    password: "userapi"
+
+master:
+  persistence:
+    enabled: true
+    path: /bitnami/redis
+replica:
+  persistence:
+    enabled: true
+    path: /bitnami/redis
+  # size: 2Gi
+# livenessProbe:
+  # enable: false
+# redinessProbe:
+  # enable: false

@@ -54,7 +54,6 @@ func Validate(auth string, c echo.Context) (interface{}, error) {
 
 	// claims are of type `jwt.MapClaims` when token is created with `jwt.Parse`
 	token, err := jwt.Parse(auth, remoteKeyFunc)
-
 	tokenRevoked, _ := GetToken(token.Raw)
 
 	if tokenRevoked {
