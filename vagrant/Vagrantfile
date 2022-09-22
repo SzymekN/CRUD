@@ -264,11 +264,13 @@ Vagrant.configure("2") do |config|
       minikube kubectl -- create -f  /vagrant_data/shared/kubernetes/consumer.yaml
       SHELL
 
-      minikube.vm.provision "shell", run: "always", inline: <<-SHELL
+      # minikube.vm.provision "shell", run: "always", inline: <<-SHELL
+      minikube.vm.provision "shell",  inline: <<-SHELL
       minikube start --memory 6144 --cpus 2
       alias kubectl="minikube kubectl --"
       eval $(minikube -p minikube docker-env)
       docker build --tag userapi:latest /vagrant_data
+      ./vagrant_data/shared/kubernetes/restart.sh
       docker build --tag consumer:latest /consumer_data
 
       # minikube kubectl -- port-forward service/userapi 8200:8200 8201:8201 --address 0.0.0.0

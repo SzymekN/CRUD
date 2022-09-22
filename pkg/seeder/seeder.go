@@ -64,7 +64,6 @@ func AllCASS() []SeedCASS {
 				var err error
 
 				for _, o := range Operators {
-					// tu może nie działać coś
 					pwd, _ := auth.GeneratehashPassword(o.Password)
 					err = cas.Query(`Insert into userapi.operators(username, email,password, role) values (?,?,?,?)`, o.Username, o.Email, pwd, o.Role).Exec()
 					if err != nil {

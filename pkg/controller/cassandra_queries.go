@@ -47,7 +47,6 @@ func GetUserByIdCassandra(id int) (model.User, error) {
 	u := model.User{}
 
 	if err := cas.Query(`Select id, firstname, lastname, age from userapi.users where id=?`, id).Consistency(gocql.One).Scan(&u.Id, &u.Firstname, &u.Lastname, &u.Age); err != nil {
-		fmt.Println("Nie ma", err)
 		return u, err
 	}
 	return u, nil

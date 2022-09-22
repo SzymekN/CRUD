@@ -31,7 +31,7 @@ func SetupRouter() *echo.Echo {
 
 	jwt_auth.GET("/api/v1/users/:id", GetUserById)
 	jwt_auth.GET("/api/v1/users", GetUsers)
-	jwt_auth.POST("/api/v1/users/save", SaveUser)
+	jwt_auth.POST("/api/v1/users/save", SaveUser, auth.IsAdmin)
 	jwt_auth.PUT("/api/v1/users/:id", UpdateUser, auth.IsAdmin)
 	jwt_auth.DELETE("/api/v1/users/:id", DeleteUser, auth.IsAdmin)
 

@@ -13,24 +13,6 @@ import (
 
 var Secretkey string = ""
 
-type Operator struct {
-	Username string `json:"username" form:"username"`
-	Email    string `json:"email" form:"email"`
-	Password string `json:"password" form:"password"`
-	Role     string `json:"role" form:"role"`
-}
-
-type Authentication struct {
-	Username string `json:"username" form:"username"`
-	Password string `json:"password" form:"password"`
-}
-
-type Token struct {
-	Role        string `json:"role" form:"role"`
-	Username    string `json:"username" form:"username"`
-	TokenString string `json:"token" form:"token"`
-}
-
 func GeneratehashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
@@ -106,8 +88,7 @@ func GenerateJWT(username, role string) (string, error) {
 		fmt.Errorf("Something Went Wrong: %s", err.Error())
 		return "", err
 	}
-	// SetToken(tokenString, Secretkey, expireTime)
-	// SetToken(tokenString, Secretkey, expireTime)
+
 	return tokenString, nil
 }
 

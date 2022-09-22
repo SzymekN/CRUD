@@ -8,18 +8,25 @@ data:
   API_PORT: "8200"
   GRPC_PORT: "8201"
   PG_HOST: postgres
+  PG_USER: userapi
+  PG_PASSWORD: userapi
+  PG_PORT: "5432"
   CASSANDRA_HOST: cassandra
   CASSANDRA_USER: userapi
   CASSANDRA_PASSWORD: userapi
   REDIS_HOST: redis-master
+  REDIS_PORT: "6379"
   REDIS_PASSWORD: userapi
+  KAFKA_HOST: "kafka"
+  KAFKA_PORT: "9092"
+  KAFKA_TOPIC: "messages"
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: userapi
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: userapi

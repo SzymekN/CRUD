@@ -10,9 +10,9 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-const (
-	topic         = "messages"
-	brokerAddress = "kafka:9092"
+var (
+	topic         = os.Getenv("KAFKA_TOPIC")
+	brokerAddress = os.Getenv("KAFKA_HOST") + ":" + os.Getenv("KAFKA_PORT")
 )
 
 var (
@@ -45,7 +45,7 @@ func ProduceMessage(k, val string) error {
 	return nil
 }
 
-func Setup() {
+func SetupKafka() {
 	KafkaCtx = context.Background()
 
 	l := log.New(os.Stdout, "kafka writer: ", 0)
